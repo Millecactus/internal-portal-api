@@ -1,0 +1,33 @@
+{
+  "name": "endurance-template",
+  "version": "0.1.0",
+  "description": "a lightweight express-based api framework with blueprint",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon ./bin/www",
+    "prod": "node ./bin/www",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "edrm-hello-world": "^0.1.0",
+    "endurance-core": "^0.1.6",
+    "mongoose": "^7.0.4",
+    "openai": "^4.61.1"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1",
+    "nodemon": "^3.1.4",
+    "supertest": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/florianduport/endurance-template.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/florianduport/endurance-template/issues"
+  },
+  "homepage": "https://github.com/florianduport/endurance-template#readme"
+}
