@@ -113,6 +113,5 @@ listener.createListener(eventTypes.GENERATE_DAILY_NEWS, () => {
   generateDailyNews();
 });
 
-console.log('Daily News listener initialized');
 
 export default listener;
