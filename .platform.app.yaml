@@ -2,6 +2,8 @@ name: discord-tools
 
 type: nodejs:20
 
+disk: 512
+
 mounts:
   'logs':
     source: local
