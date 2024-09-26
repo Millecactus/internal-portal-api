@@ -20,7 +20,7 @@ async function fetchNews() {
   const to = formatDate(today);
   const sources = process.env.DAILY_NEWS_NEWSAPI_SOURCES.replace(/;/g, ',');
   const url = `https://newsapi.org/v2/top-headlines?q=&from=${from}&to=${to}&sortBy=popularity&apiKey=${process.env.DAILY_NEWS_NEWSAPI_KEY}&language=en&sources=${sources}`;
-  console.log(url);
+
   try {
     const response = await axios.get(url);
     const articles = response.data.articles.slice(0, 10);
@@ -57,6 +57,7 @@ async function sendNewsToDiscord(formattedNews) {
   const discordWebhooks = process.env.DAILY_NEWS_DISCORD_WEBHOOKS;
 
   if (discordWebhooks) {
+    console.log("webhooks detected")
     const discordWebhooksArray = discordWebhooks.split(";");
 
     let currentMessage = "";
@@ -65,6 +66,7 @@ async function sendNewsToDiscord(formattedNews) {
     for (const line of lines) {
       if ((currentMessage + line).length > maxMessageLength) {
         for (const discordWebhook of discordWebhooksArray) {
+          console.log("push to webhook");
           await fetch(discordWebhook, {
             method: 'POST',
             headers: {
@@ -75,7 +77,6 @@ async function sendNewsToDiscord(formattedNews) {
             }),
           });
         }
-        console.log(currentMessage);
         currentMessage = "";
       }
       currentMessage += line + "\n";
@@ -93,7 +94,6 @@ async function sendNewsToDiscord(formattedNews) {
           }),
         });
       }
-      console.log(currentMessage);
     }
   }
 }
