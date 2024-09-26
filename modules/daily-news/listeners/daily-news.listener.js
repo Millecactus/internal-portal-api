@@ -57,7 +57,6 @@ async function sendNewsToDiscord(formattedNews) {
   const discordWebhooks = process.env.DAILY_NEWS_DISCORD_WEBHOOKS;
 
   if (discordWebhooks) {
-    console.log("webhooks detected")
     const discordWebhooksArray = discordWebhooks.split(";");
 
     let currentMessage = "";
@@ -66,16 +65,19 @@ async function sendNewsToDiscord(formattedNews) {
     for (const line of lines) {
       if ((currentMessage + line).length > maxMessageLength) {
         for (const discordWebhook of discordWebhooksArray) {
-          console.log("push to webhook");
-          await fetch(discordWebhook, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              content: currentMessage,
-            }),
-          });
+          try {
+            await fetch(discordWebhook, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                content: currentMessage,
+              }),
+            });
+          } catch (error) {
+            console.error(`Error pushing to webhook ${discordWebhook}:`, error);
+          }
         }
         currentMessage = "";
       }
