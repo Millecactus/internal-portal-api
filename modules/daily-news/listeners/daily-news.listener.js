@@ -61,19 +61,16 @@ async function sendNewsToDiscord(formattedNews) {
 
     let currentMessage = "";
     const lines = formattedNews.split("\n");
-
     for (const line of lines) {
       if ((currentMessage + line).length > maxMessageLength) {
         for (const discordWebhook of discordWebhooksArray) {
           try {
-            await fetch(discordWebhook, {
-              method: 'POST',
+            await axios.post(discordWebhook, {
+              content: currentMessage,
+            }, {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({
-                content: currentMessage,
-              }),
             });
           } catch (error) {
             console.error(`Error pushing to webhook ${discordWebhook}:`, error);
