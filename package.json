@@ -2,7 +2,7 @@
   "name": "endurance-template",
   "version": "0.1.0",
   "description": "a lightweight express-based api framework with blueprint",
-  "type":"module",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "nodemon ./bin/www",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "debug": "^4.3.7",
     "endurance-core": "^0.2.5",
     "mongoose": "^7.0.4",
     "openai": "^4.61.1"

@@ -9,7 +9,7 @@ const generateDailyNews = async () => {
   }
 };
 
-const cronTime = process.env.DAILY_NEWS_CRON_TIME ? process.env.DAILY_NEWS_CRON_TIME : '0 16 * * 1-5';
+const cronTime = process.env.DAILY_NEWS_CRON_TIME ? process.env.DAILY_NEWS_CRON_TIME : '0 14 * * 1-5';
 loadCronJob('generateDailyNews', cronTime, generateDailyNews);
 
 export default {};

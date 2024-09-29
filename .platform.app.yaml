@@ -5,17 +5,17 @@ type: nodejs:20
 disk: 512
 
 mounts:
-  'logs':
+  "logs":
     source: local
     source_path: logs
 
 dependencies:
-    nodejs:
-        sharp: "*"
+  nodejs:
+    sharp: "*"
 
 web:
-    commands:
-        start: "npm start"
-    locations:
-        /ws:
-            passthru: true
+  commands:
+    start: "npm start"
+  locations:
+    /ws:
+      passthru: true
