@@ -47,7 +47,7 @@ function formatNewsForDiscord(articles) {
     message += `> *Source: ${article.source.name}*\n`;
     message += "\n";
   });
-  message += "## 💡 Anything else we missed? Feel free to share your fovorite news of the day!"
+  message += "## 💡 Anything else we missed? Feel free to share your favorite news of the day!"
 
   return message;
 }
