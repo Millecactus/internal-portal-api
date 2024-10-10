@@ -134,16 +134,20 @@ userSchema.methods.completeQuest = async function (questId) {
 
         // Add XP reward to the user with questId
         await this.addXP(quest.xpReward, `Completed quest: ${quest.name}`, questId);
-
+ 
         // Optionally, handle badge rewards if applicable
         if (quest.badgeReward) {
             if (!Array.isArray(this.badges)) {
                 this.badges = [];
             }
-            this.badges.push({
-                badge: new mongoose.Types.ObjectId(quest.badgeReward),
-                awardedDate: new Date()
-            });
+            // Check if the badge is already possessed
+            const badgeExists = this.badges.some(badge => badge.badge.equals(quest.badgeReward));
+            if (!badgeExists) {
+                this.badges.push({
+                    badge: quest.badgeReward._id,
+                    awardedDate: new Date()
+                });
+            }
         }
 
         // Save the user document

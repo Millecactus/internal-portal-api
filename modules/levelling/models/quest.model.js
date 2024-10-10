@@ -34,6 +34,12 @@ const questSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Badge', // Assumes a Badge model will be created separately
         required: false,
+    },
+    status: {
+        type: String,
+        enum: ['open', 'closed'],
+        default: 'open',
+        required: true,
     }
 });
 questSchema.pre('remove', async function(next) {
