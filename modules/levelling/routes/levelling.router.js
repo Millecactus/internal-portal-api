@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
 const commands = [
     new SlashCommandBuilder()
         .setName('programisto')
-        .setDescription('Get your XP, badges, and quests')
+        .setDescription('Get your XP, badges, quests, and lootbox')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('xp')
@@ -50,6 +50,11 @@ const commands = [
             subcommand
                 .setName('achieved-quests')
                 .setDescription('Lists all achieved quests')
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('lootbox')
+                .setDescription('Catch the lootbox that pops sometimes')
         )
 ].map(command => command.toJSON());
 
@@ -165,6 +170,36 @@ client.on('interactionCreate', async interaction => {
                 console.error('Error fetching achieved quests:', error);
                 await interaction.reply({ content: 'Error fetching your achieved quests.', ephemeral: true });
             }
+        }
+    } else if (subcommand === 'lootbox') {
+        try {
+            const user = await User.findOne({ discordId: interaction.user.id }).exec();
+            if (!user) {
+                await interaction.reply({ content: 'User not found in the database.', ephemeral: true });
+                return;
+            }
+
+            const lootboxQuest = await Quest.getTodayQuestWithLootboxHour();
+            if (!lootboxQuest) {
+                await interaction.reply({ content: 'No lootbox quest available today.', ephemeral: true });
+                return;
+            }
+
+            const isQuestCompleted = user.completedQuests.some(completedQuest => completedQuest.quest.equals(lootboxQuest._id));
+            if (isQuestCompleted) {
+                await interaction.reply({ content: 'You have already completed today\'s lootbox quest.', ephemeral: true });
+                return;
+            }
+
+            // Complete the quest for the user
+            await user.completeQuest(lootboxQuest._id);
+            user.xp += lootboxQuest.xpReward;
+            await user.save();
+
+            await interaction.reply({ content: `Congratulations ${interaction.user.username}, you have won today's lootbox and earned ${lootboxQuest.xpReward} XP! 🎉`, ephemeral: true });
+        } catch (error) {
+            console.error('Error processing lootbox quest:', error);
+            await interaction.reply({ content: 'Error processing lootbox quest.', ephemeral: true });
         }
     }
 });
