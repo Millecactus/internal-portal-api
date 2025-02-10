@@ -79,12 +79,11 @@ questSchema.statics.getTodayQuestWithLootboxHour = async function() {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1); // Set to start of the next day
 
-        // Find a quest that starts today and ends tomorrow with a lootbox hour
+        // Find a quest that starts today and ends tomorrow with a lootbox hour, ordered by id descending
         const quest = await this.findOne({
             startDate: { $gte: today, $lt: tomorrow },
-            lootboxHour: { $exists: true },
-            status: 'open'
-        }).exec();
+            lootboxHour: { $exists: true }
+        }).sort({ id: -1 }).exec();
 
         return quest;
     } catch (error) {

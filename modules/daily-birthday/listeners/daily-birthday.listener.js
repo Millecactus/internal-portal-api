@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 import axios from 'axios';
 import fetch from 'node-fetch';
-import User from '../models/user.model.js';
 
 
 // Fonction pour récupérer la météo via OpenWeather avec des dates dynamiques
