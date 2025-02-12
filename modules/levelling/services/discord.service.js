@@ -10,10 +10,16 @@ const DiscordService = () => {
     let guild, channel;
 
     const init = async () => {
-        await client.login(process.env.DISCORD_APP_TOKEN);
-        guild = await client.guilds.fetch(process.env.LEVELLING_GUILD_ID);
-        channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
-        await loadCommands();
+        try{
+            await client.login(process.env.DISCORD_APP_TOKEN);
+            guild = await client.guilds.fetch(process.env.LEVELLING_GUILD_ID);
+            channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
+            await loadCommands();
+        }
+        catch(error){
+            console.log("Error loading Discord client");
+            console.log(error);
+        }
     };
 
     const loadCommands = async () => {
