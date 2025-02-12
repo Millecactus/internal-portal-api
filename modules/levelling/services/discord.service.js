@@ -10,19 +10,25 @@ const DiscordService = () => {
     let guild, channel;
 
     const init = async () => {
-        try{
+        try {
             await client.login(process.env.DISCORD_APP_TOKEN);
-            if(client && client.guilds && client.channels){
+            if (client && client.guilds) {
                 guild = await client.guilds.fetch(process.env.LEVELLING_GUILD_ID);
-                channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
-                await loadCommands();
+                if (guild && guild.channels) {
+                    channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
+                    await loadCommands();
+                } else {
+                    console.log(guild);
+                    throw new Error("Discord guild is empty")
+                }
+
             } else {
                 console.log(client);
                 throw new Error("Discord client is empty")
             }
-            
+
         }
-        catch(error){
+        catch (error) {
             console.log("Error loading Discord client");
             console.log(error);
         }
