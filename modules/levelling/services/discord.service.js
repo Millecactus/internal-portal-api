@@ -13,7 +13,7 @@ const DiscordService = () => {
         try {
             await client.login(process.env.DISCORD_APP_TOKEN);
             if (client && client.guilds) {
-                guild = await client.guilds.fetch(process.env.LEVELLING_GUILD_ID);
+                guild = client.guilds.cache.get(process.env.LEVELLING_GUILD_ID);
                 if (guild && guild.channels) {
                     channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
                     await loadCommands();
