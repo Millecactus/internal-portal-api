@@ -4,7 +4,6 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import User from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
-
 const DiscordService = () => {
     const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
     let guild, channel;
@@ -13,7 +12,8 @@ const DiscordService = () => {
         try {
             await client.login(process.env.DISCORD_APP_TOKEN);
             if (client && client.guilds) {
-                guild = client.guilds.cache.get(process.env.LEVELLING_GUILD_ID);
+                guild = await client.guilds.fetch(process.env.LEVELLING_GUILD_ID);
+                console.log(guild)
                 if (guild && guild.channels) {
                     channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
                     await loadCommands();
