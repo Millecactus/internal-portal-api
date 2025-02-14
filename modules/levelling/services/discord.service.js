@@ -11,26 +11,34 @@ const DiscordService = () => {
     const init = async () => {
         try {
             await client.login(process.env.DISCORD_APP_TOKEN);
-            if (client && client.guilds) {
-                guild = await client.guilds.fetch(process.env.LEVELLING_GUILD_ID);
-                console.log(guild)
-                if (guild && guild.channels) {
-                    channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
-                    await loadCommands();
-                } else {
-                    console.log(guild);
-                    throw new Error("Discord guild is empty")
-                }
+            console.log("Bot logged in");
 
-            } else {
-                console.log(client);
-                throw new Error("Discord client is empty")
+            if (!client || !client.guilds) {
+                throw new Error("Discord client or guilds are empty");
             }
 
-        }
-        catch (error) {
-            console.log("Error loading Discord client");
-            console.log(error);
+            // Fetch the guild and ensure it is available
+            guild = await client.guilds.fetch({ guild: process.env.LEVELLING_GUILD_ID, force: true });
+            if (!guild || !guild.available) {
+                throw new Error(`Guild with ID ${process.env.LEVELLING_GUILD_ID} is unavailable or not found`);
+            }
+
+            console.log(`Guild fetched: ${guild.name}`);
+
+            // Fetch the channel and ensure it exists
+            channel = await guild.channels.fetch(process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID);
+            if (!channel) {
+                throw new Error(`Channel with ID ${process.env.LEVELLING_ANNOUNCEMENT_CHANNEL_ID} not found in guild ${guild.name}`);
+            }
+
+            console.log(`Channel fetched: ${channel.name}`);
+
+            // Execute loadCommands function if everything is OK
+            await loadCommands();
+            console.log("Commands loaded successfully");
+
+        } catch (error) {
+            console.error("Error loading Discord client:", error);
         }
     };
 
