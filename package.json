@@ -5,7 +5,8 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon ./bin/www",
+    "start": "node ./bin/www",
+    "dev" : "nodemon ./bin/www",
     "prod": "node ./bin/www",
     "test": "mocha"
   },
