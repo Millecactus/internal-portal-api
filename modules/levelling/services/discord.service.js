@@ -4,6 +4,12 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import User from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+
+
 const DiscordService = () => {
     const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
     let guild, channel;
