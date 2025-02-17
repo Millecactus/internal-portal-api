@@ -32,9 +32,9 @@ router.get("/weekly-presence", async (req, res) => {
 
 router.get("/today", async (req, res) => {
     try {
-        const startOfDay = moment().startOf('day').utc().toDate();
-        const endOfDay = moment().endOf('day').utc().toDate();
-
+        const startOfDay = moment.utc().startOf('day').subtract(1, 'hours').toDate(); // Utilisation de moment.utc() et soustraction d'une heure
+        const endOfDay = moment.utc().endOf('day').toDate(); // Utilisation de moment.utc()
+        console.log(startOfDay)
         const presences = await Presence.find({
             date: {
                 $gte: startOfDay,
