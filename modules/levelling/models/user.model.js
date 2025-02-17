@@ -64,7 +64,6 @@ userSchema.methods.getXP = function () {
     return this.xpHistory.reduce((total, entry) => total + entry.amount, 0);
 };
 
-
 userSchema.methods.getLevel = function () {
     let totalXP = this.getXP();
     let level = 1;
@@ -79,6 +78,13 @@ userSchema.methods.getLevel = function () {
         xpForNextLevel = Math.floor(baseXP * Math.pow(coefficient, level - 1));
     }
     return level;
+}
+
+userSchema.methods.getXPforNextLevel = function () {
+    let level = this.getLevel();
+    let baseXP = process.env.LEVELLING_BASE_XP ? process.env.LEVELLING_BASE_XP : 500;
+    let coefficient = process.env.LEVELLING_COEFFICIENT ? process.env.LEVELLING_COEFFICIENT : 1.3;
+    return Math.floor(baseXP * Math.pow(coefficient, level - 1));
 }
 
 

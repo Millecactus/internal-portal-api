@@ -4,19 +4,38 @@ import User from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
-
+import { auth, accessControl } from 'endurance-core/lib/auth.js';
 
 const router = routerBase();
 
-router.get("/", async (req, res) => {
+router.get("/", accessControl.isAuthenticated(), async (req, res) => {
+
     try {
-        const user = await User.findOne().exec();
-        res.json(user);
+        const user = req.user;
+        const userEmail = req.user.email; // Supposons que l'email de l'utilisateur est extrait de l'accessToken
+        const fullUser = await User.findOne({ email: userEmail })
+            .populate('completedQuests.quest')
+            .populate('badges.badge')
+            .exec();
+        if (!fullUser) {
+            return res.status(404).send('Utilisateur non trouvé');
+        }
+        res.json({
+            email: fullUser.email,
+            xpHistory: fullUser.xpHistory,
+            completedQuests: fullUser.completedQuests,
+            badges: fullUser.badges,
+            level: fullUser.getLevel(),
+            xpForNextLevel: fullUser.getXPforNextLevel()
+
+        });
     } catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).send('Internal Server Error');
     }
 });
+
+
 
 router.get("/complete-quest", async (req, res) => {
     try {

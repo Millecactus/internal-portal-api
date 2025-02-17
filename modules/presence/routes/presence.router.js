@@ -29,6 +29,26 @@ router.get("/weekly-presence", async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+router.get("/today", async (req, res) => {
+    try {
+        const startOfDay = moment().startOf('day').toDate();
+        const endOfDay = moment().endOf('day').toDate();
+
+        const presences = await Presence.find({
+            date: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        }, null, { strictPopulate: false })
+        .populate('user', 'firstname lastname')
+        .exec();
+
+        res.json(presences);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des présences pour aujourd\'hui:', error);
+        res.status(500).send('Erreur interne du serveur');
+    }
+});
 
 router.post("/presence", accessControl.isAuthenticated(), async (req, res) => {
     try {
