@@ -29,10 +29,11 @@ router.get("/weekly-presence", async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 router.get("/today", async (req, res) => {
     try {
-        const startOfDay = moment().startOf('day').toDate();
-        const endOfDay = moment().endOf('day').toDate();
+        const startOfDay = moment().startOf('day').utc().toDate();
+        const endOfDay = moment().endOf('day').utc().toDate();
 
         const presences = await Presence.find({
             date: {
