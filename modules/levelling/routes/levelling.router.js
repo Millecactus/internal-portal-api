@@ -35,6 +35,28 @@ router.get("/", accessControl.isAuthenticated(), async (req, res) => {
     }
 });
 
+router.get("/available-quests", accessControl.isAuthenticated(), async (req, res) => {
+    try {
+        const userEmail = req.user.email; // Supposons que l'email de l'utilisateur est extrait de l'accessToken
+        const user = await User.findOne({ email: userEmail })
+            .populate('completedQuests.quest')
+            .exec();
+
+        if (!user) {
+            return res.status(404).send('Utilisateur non trouvé');
+        }
+
+        const completedQuestIds = user.completedQuests.map(quest => quest.quest._id);
+
+        const availableQuests = await Quest.find({ _id: { $nin: completedQuestIds }, status: 'open' }).exec();
+
+        res.json(availableQuests);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des quêtes disponibles:', error);
+        res.status(500).send('Erreur interne du serveur');
+    }
+});
+
 
 
 router.get("/complete-quest", async (req, res) => {
