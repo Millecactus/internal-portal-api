@@ -17,13 +17,29 @@ const presenceSchema = new mongoose.Schema({
   }
 });
 
-presenceSchema.pre('save', async function(next) {
+
+presenceSchema.pre('save', async function (next) {
   try {
-    // Delete all presences for the same user and date
-    await this.constructor.deleteMany({ user: this.user, date: this.date });
+    const startOfDay = new Date(this.date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const noon = new Date(this.date);
+    noon.setHours(12, 0, 0, 0);
+    const endOfDay = new Date(this.date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    let query;
+    if (this.date < noon) {
+      // Matin: de minuit à 12h
+      query = { user: this.user, date: { $gte: startOfDay, $lt: noon } };
+    } else {
+      // Après-midi: de 12h à 23h59
+      query = { user: this.user, date: { $gte: noon, $lte: endOfDay } };
+    }
+
+    await this.constructor.deleteMany(query);
     next();
   } catch (error) {
-    next(new Error('Error during pre-save: ' + error.message));
+    next(new Error('Erreur lors du pré-enregistrement: ' + error.message));
   }
 });
 

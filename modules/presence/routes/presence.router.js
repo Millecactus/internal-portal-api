@@ -4,9 +4,9 @@ import Presence from '../models/presence.model.js';
 import moment from 'moment';
 import { auth, accessControl } from 'endurance-core/lib/auth.js';
 
-const router = routerBase({requireDb: true});
+const router = routerBase({ requireDb: true });
 
-router.get("/weekly-presence", async (req, res) => {  
+router.get("/weekly-presence", async (req, res) => {
 
     try {
         const { startDate } = req.query;
@@ -20,8 +20,8 @@ router.get("/weekly-presence", async (req, res) => {
                 $lte: endOfWeek
             }
         }, null, { strictPopulate: false })
-        .populate('user', 'firstname lastname') 
-        .exec();
+            .populate('user', 'firstname lastname')
+            .exec();
 
         res.json(presences);
     } catch (error) {
@@ -41,8 +41,8 @@ router.get("/today", async (req, res) => {
                 $lte: endOfDay
             }
         }, null, { strictPopulate: false })
-        .populate('user', 'firstname lastname')
-        .exec();
+            .populate('user', 'firstname lastname')
+            .exec();
 
         res.json(presences);
     } catch (error) {
@@ -53,7 +53,7 @@ router.get("/today", async (req, res) => {
 
 router.post("/presence", accessControl.isAuthenticated(), async (req, res) => {
     try {
-         const userId = req.user.id; // Supposons que l'ID de l'utilisateur est maintenant extrait de l'accessToken
+        const userId = req.user.id; // Supposons que l'ID de l'utilisateur est maintenant extrait de l'accessToken
         const { date, type } = req.body;
 
         if (!date || !type) {
@@ -62,6 +62,36 @@ router.post("/presence", accessControl.isAuthenticated(), async (req, res) => {
 
         if (!['office', 'client', 'remote', 'school', 'away'].includes(type)) {
             return res.status(400).send('Type de présence invalide');
+        }
+
+        const startOfDay = moment(date).startOf('day').toDate();
+        const endOfDay = moment(date).endOf('day').toDate();
+
+        const existingPresences = await Presence.find({
+            user: userId,
+            date: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        });
+
+        if (existingPresences.length === 0) {
+            const morningPresence = new Presence({
+                user: userId,
+                date: moment(date).hour(1).minute(0).second(0).toDate(),
+                type: type
+            });
+
+            const afternoonPresence = new Presence({
+                user: userId,
+                date: moment(date).hour(14).minute(0).second(0).toDate(),
+                type: type
+            });
+
+            await morningPresence.save();
+            await afternoonPresence.save();
+
+            return res.status(201).json([morningPresence, afternoonPresence]);
         }
 
         const newPresence = new Presence({
