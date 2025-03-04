@@ -289,7 +289,7 @@ const DiscordService = () => {
             return;
         }
 
-        const imageUrl = 'https://i.ibb.co/m6tY5kQ/lootbox-novembre.png'; // ou 'path/to/your/image.jpg'
+        const imageUrl = 'https://i.ibb.co/gLwZzT5Z/image.png'; // ou 'path/to/your/image.jpg'
 
         // Création de l'attachment
         const attachment = new AttachmentBuilder(imageUrl);
