@@ -1,10 +1,10 @@
-import routerBase from 'endurance-core/lib/router.js';
-import { emitter, eventTypes } from 'endurance-core/lib/emitter.js';
+import routerBase from 'endurance-core/dist/router.js';
+import { emitter, eventTypes } from 'endurance-core/dist/emitter.js';
 import User from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
-import { auth, accessControl } from 'endurance-core/lib/auth.js';
+import { auth, accessControl } from 'endurance-core/dist/auth.js';
 
 const router = routerBase();
 

@@ -1,5 +1,5 @@
-import listener from 'endurance-core/lib/listener.js';
-import { emitter, eventTypes } from 'endurance-core/lib/emitter.js';
+import listener from 'endurance-core/dist/listener.js';
+import { emitter, eventTypes } from 'endurance-core/dist/emitter.js';
 
 import dotenv from 'dotenv';
 dotenv.config();

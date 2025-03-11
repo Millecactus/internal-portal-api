@@ -6,7 +6,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node ./bin/www",
-    "dev" : "nodemon ./bin/www",
+    "dev": "nodemon ./bin/www",
     "prod": "node ./bin/www",
     "test": "mocha"
   },
@@ -16,9 +16,9 @@
     "debug": "^4.3.7",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.7",
-    "edrm-prometheus": "^1.0.0",
-    "edrm-user": "^0.2.10",
-    "endurance-core": "^0.2.21",
+    "edrm-prometheus": "^1.0.4",
+    "edrm-user": "^0.2.12",
+    "endurance-core": "^0.3.4",
     "moment": "^2.30.1",
     "mongoose": "7.0.4",
     "openai": "^4.61.1"

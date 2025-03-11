@@ -103,7 +103,7 @@ Here is an example of how to add a simple "login" module:
 3. **Define the route (`login.router.js`)**:
 
     ```javascript
-    const router = require('endurance-core/lib/router')();
+    const router = require('endurance-core/dist/router')();
 
     router.post('/login', (req, res) => {
       // Your login logic here

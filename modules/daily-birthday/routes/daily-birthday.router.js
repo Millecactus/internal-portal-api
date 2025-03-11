@@ -1,6 +1,6 @@
-import routerBase from 'endurance-core/lib/router.js';
-import { emitter, eventTypes } from 'endurance-core/lib/emitter.js';
-import { auth } from 'endurance-core/lib/auth.js'
+import routerBase from 'endurance-core/dist/router.js';
+import { emitter, eventTypes } from 'endurance-core/dist/emitter.js';
+import { auth } from 'endurance-core/dist/auth.js'
 
 
 const router = routerBase();

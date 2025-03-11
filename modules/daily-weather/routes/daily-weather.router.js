@@ -1,5 +1,5 @@
-import routerBase from 'endurance-core/lib/router.js';
-import { emitter, eventTypes } from 'endurance-core/lib/emitter.js';
+import routerBase from 'endurance-core/dist/router.js';
+import { emitter, eventTypes } from 'endurance-core/dist/emitter.js';
 
 const router = routerBase();
 

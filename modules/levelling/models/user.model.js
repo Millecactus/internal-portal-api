@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { emitter, eventTypes } from 'endurance-core/lib/emitter.js';
+import { emitter, eventTypes } from 'endurance-core/dist/emitter.js';
 
 import Quest from '../models/quest.model.js';
 
@@ -140,7 +140,7 @@ userSchema.methods.completeQuest = async function (questId) {
 
         // Add XP reward to the user with questId
         await this.addXP(quest.xpReward, `Completed quest: ${quest.name}`, questId);
- 
+
         // Optionally, handle badge rewards if applicable
         if (quest.badgeReward) {
             if (!Array.isArray(this.badges)) {
@@ -159,11 +159,11 @@ userSchema.methods.completeQuest = async function (questId) {
         // Save the user document
         await this.save();
         // Emit an event for quest completion
-        emitter.emit(eventTypes.LEVELLING_QUEST_COMPLETED, { 
-            firstname: this.firstname, 
-            lastname: this.lastname, 
-            questName: quest.name, 
-            badgeName: quest.badgeReward ? quest.badgeReward.name : undefined 
+        emitter.emit(eventTypes.LEVELLING_QUEST_COMPLETED, {
+            firstname: this.firstname,
+            lastname: this.lastname,
+            questName: quest.name,
+            badgeName: quest.badgeReward ? quest.badgeReward.name : undefined
         });
         console.log(`Quest completed: ${quest.name} for user ${this._id}`);
     } catch (error) {

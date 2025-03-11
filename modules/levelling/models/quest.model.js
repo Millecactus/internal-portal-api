@@ -32,7 +32,7 @@ const questSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['open', 'closed'],
+        enum: ['draft', 'open', 'closed'],
         default: 'open',
         required: true,
     },
@@ -45,7 +45,7 @@ const questSchema = new mongoose.Schema({
     }
 });
 
-questSchema.pre('save', async function(next) {
+questSchema.pre('save', async function (next) {
     if (this.isNew) { // Ne fait l'incrément que pour les nouveaux documents
         const lastQuest = await mongoose.model('Quest').findOne().sort({ id: -1 }).exec();
         this.id = lastQuest ? lastQuest.id + 1 : 1;
@@ -53,7 +53,7 @@ questSchema.pre('save', async function(next) {
     next();
 });
 
-questSchema.pre('remove', async function(next) {
+questSchema.pre('remove', async function (next) {
     try {
         // Find all users who have completed this quest
         const users = await mongoose.model('UserLevelling').find({ 'completedQuests.quest': this._id }).exec();
@@ -71,7 +71,7 @@ questSchema.pre('remove', async function(next) {
     }
 });
 
-questSchema.statics.getTodayQuestWithLootboxHour = async function() {
+questSchema.statics.getTodayQuestWithLootboxHour = async function () {
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Set to start of the day

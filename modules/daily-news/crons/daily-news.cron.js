@@ -1,5 +1,5 @@
-import { loadCronJob } from 'endurance-core/lib/cron.js';
-import { emitter, eventTypes } from 'endurance-core/lib/emitter.js';
+import { loadCronJob } from 'endurance-core/dist/cron.js';
+import { emitter, eventTypes } from 'endurance-core/dist/emitter.js';
 
 const generateDailyNews = async () => {
   try {
