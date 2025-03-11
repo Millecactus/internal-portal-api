@@ -30,7 +30,7 @@ router.get("/weekly-presence", async (req, res) => {
     }
 });
 
-router.get("/today", async (req, res) => {
+router.get("/today/:type", async (req, res) => {
     try {
         const startOfDay = moment.utc().startOf('day').subtract(1, 'hours').toDate(); // Utilisation de moment.utc() et soustraction d'une heure
         const endOfDay = moment.utc().endOf('day').subtract(1, 'hours').toDate(); // Utilisation de moment.utc()
@@ -39,12 +39,24 @@ router.get("/today", async (req, res) => {
             date: {
                 $gte: startOfDay,
                 $lte: endOfDay
-            }
+            },
+            type: req.params.type
         }, null, { strictPopulate: false })
             .populate('user', 'firstname lastname')
             .exec();
 
-        res.json(presences);
+        const presencesRegroupees = [];
+        for (const presence of presences) {
+            console.log(presence.user.firstname)
+            if (!presencesRegroupees.find(p => p.user.firstname === presence.user.firstname && p.user.lastname === presence.user.lastname)) {
+                presencesRegroupees.push({
+                    user: presence.user,
+                    presences: [presence]
+                });
+            }
+        }
+
+        res.json(presencesRegroupees);
     } catch (error) {
         console.error('Erreur lors de la récupération des présences pour aujourd\'hui:', error);
         res.status(500).send('Erreur interne du serveur');
