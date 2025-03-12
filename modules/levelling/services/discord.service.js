@@ -162,7 +162,7 @@ const DiscordService = () => {
                         await interaction.reply({ content: `You have completed the following quests: ${achievedQuestList}.`, ephemeral: true });
                     } else if (subcommand === 'lootbox') {
                         const lootboxQuest = await Quest.getTodayQuestWithLootboxHour();
-                        if (!lootboxQuest) {
+                        if (!lootboxQuest || lootboxQuest.status !== 'open') {
                             await interaction.reply({ content: 'No lootbox quest available today.', ephemeral: true });
                             return;
                         }
