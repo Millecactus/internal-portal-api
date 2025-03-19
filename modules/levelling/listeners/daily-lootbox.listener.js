@@ -77,7 +77,8 @@ async function generateDailyLootboxV2() {
 
             // Generate a cron format with random minutes
             const randomMinute = Math.floor(Math.random() * 60);
-            const cronFormat = `${randomMinute} ${lootboxQuest.lootboxHour} * * 1-5`;
+            const date = new Date(lootboxQuest.startDate);
+            const cronFormat = `${randomMinute} ${lootboxQuest.lootboxHour} ${date.getDate()} ${date.getMonth() + 1} *`;
 
             registerCronJobs(cronFormat);
         }
