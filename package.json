@@ -1,32 +1,37 @@
 {
-  "name": "endurance-template",
-  "version": "0.1.0",
+  "name": "internal-portal-api",
+  "version": "0.2.1",
   "description": "a lightweight express-based api framework with blueprint",
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www",
-    "prod": "node ./bin/www",
-    "test": "mocha"
+    "start": "node ./dist/bin/www",
+    "dev": "tsc-watch --onSuccess \"node ./dist/bin/www\"",
+    "test": "mocha",
+    "build": "tsc"
   },
   "dependencies": {
+    "@typegoose/typegoose": "^12.14.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "debug": "^4.3.7",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.7",
     "edrm-prometheus": "^1.0.4",
-    "edrm-user": "^0.2.12",
-    "endurance-core": "^0.3.4",
+    "edrm-user": "^0.3.2",
+    "endurance-core": "^0.4.20",
     "moment": "^2.30.1",
-    "mongoose": "7.0.4",
-    "openai": "^4.61.1"
+    "mongoose": "8.13.1",
+    "openai": "^4.61.1",
+    "tsc-watch": "^6.2.1"
   },
   "devDependencies": {
     "mocha": "^5.1.1",
     "nodemon": "^3.1.4",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.3.3",
+    "@types/jest": "^29.5.12"
   },
   "repository": {
     "type": "git",
