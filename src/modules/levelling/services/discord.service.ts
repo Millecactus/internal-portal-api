@@ -216,7 +216,7 @@ const DiscordService = () => {
 
                         await interaction.reply({ content: `The following quests are open:\n\n${questDetails}`, ephemeral: true });
                     } else if (subcommand === 'achieved-quests') {
-                        const userWithCompletedQuests = await User.findOne({ discordId: interaction.user.id }).populate('completedQuests.quest').exec() as unknown as UserInstance;
+                        const userWithCompletedQuests = await User.findOne({ discordId: interaction.user.id }).populate('completedQuests.quest', { strictPopulate: false }).exec() as unknown as UserInstance;
                         if (!userWithCompletedQuests?.completedQuests || userWithCompletedQuests.completedQuests.length === 0) {
                             await interaction.reply({ content: 'You have not completed any quests.', ephemeral: true });
                             return;

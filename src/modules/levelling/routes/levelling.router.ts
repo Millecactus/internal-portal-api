@@ -1,19 +1,11 @@
-import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
-import User from '../models/user.model.js';
+import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions, EnduranceDocumentType } from 'endurance-core';
+import UserModel, { UserDocument } from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
+import Badge from '../models/badge.model.js';
 
-interface UserDocument {
-    email: string;
-    xpHistory: any[];
-    completedQuests: any[];
-    badges: any[];
-    getLevel: () => number;
-    getXPforNextLevel: () => number;
-    completeQuest: (questId: any) => Promise<void>;
-    discordId?: string;
-}
+
 
 class LevellingRouter extends EnduranceRouter {
     constructor() {
@@ -34,20 +26,30 @@ class LevellingRouter extends EnduranceRouter {
         this.get('/', authenticatedOptions, async (req: any, res: any) => {
             try {
                 const userEmail = req.user.email;
-                const fullUser = await User.findOne({ email: userEmail })
-                    .populate('completedQuests.quest')
-                    .populate('badges.badge')
+                const fullUser = await UserModel.findOne({ email: userEmail })
+                    .populate({
+                        path: 'completedQuests.quest',
+                        model: Quest,
+                        options: { strictPopulate: false }
+                    })
+                    .populate({
+                        path: 'badges.badge',
+                        model: Badge,
+                        options: { strictPopulate: false }
+                    })
                     .exec() as unknown as UserDocument;
 
                 if (!fullUser) {
                     return res.status(404).send('Utilisateur non trouvé');
                 }
 
+                console.log(fullUser);
+                console.log(typeof fullUser);
                 res.json({
                     email: fullUser.email,
-                    xpHistory: fullUser.xpHistory,
-                    completedQuests: fullUser.completedQuests,
-                    badges: fullUser.badges,
+                    xpHistory: fullUser.get('xpHistory'),
+                    completedQuests: fullUser.get('completedQuests'),
+                    badges: fullUser.get('badges'),
                     level: fullUser.getLevel(),
                     xpForNextLevel: fullUser.getXPforNextLevel()
                 });
@@ -60,8 +62,8 @@ class LevellingRouter extends EnduranceRouter {
         this.get('/available-quests', authenticatedOptions, async (req: any, res: any) => {
             try {
                 const userEmail = req.user.email;
-                const user = await User.findOne({ email: userEmail })
-                    .populate('completedQuests.quest')
+                const user = await UserModel.findOne({ email: userEmail })
+                    .populate('completedQuests.quest',)
                     .exec() as unknown as UserDocument;
 
                 if (!user) {
@@ -86,7 +88,7 @@ class LevellingRouter extends EnduranceRouter {
                     return res.status(400).send('Missing discordId or questId parameter');
                 }
 
-                const user = await User.findOne({ discordId }).exec() as unknown as UserDocument;
+                const user = await UserModel.findOne({ discordId }).exec() as unknown as UserDocument;
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -96,7 +98,7 @@ class LevellingRouter extends EnduranceRouter {
                     return res.status(404).send('Quest not found');
                 }
 
-                await user.completeQuest(quest);
+                await user.completeQuest(quest._id);
                 res.send(`Quest ${quest.name} completed for user with discordId ${discordId}`);
             } catch (error) {
                 console.error('Error completing quest:', error);
@@ -118,10 +120,10 @@ class LevellingRouter extends EnduranceRouter {
                 }
 
                 const excludeIdsArray = excludeDiscordIds ? excludeDiscordIds.split(',') : [];
-                const users = await User.find({ discordId: { $nin: excludeIdsArray } }).exec() as unknown as UserDocument[];
+                const users = await UserModel.find({ discordId: { $nin: excludeIdsArray } }).exec() as unknown as UserDocument[];
 
                 for (const user of users) {
-                    await user.completeQuest(quest);
+                    await user.completeQuest(quest._id);
                 }
 
                 res.send(`Quest ${quest.name} completed for all users except those with discordIds: ${excludeIdsArray.join(', ')}`);
@@ -133,7 +135,7 @@ class LevellingRouter extends EnduranceRouter {
 
         this.get('/update-nicknames', publicOptions, async (req: any, res: any) => {
             try {
-                const users = await User.find().exec() as unknown as UserDocument[];
+                const users = await UserModel.find().exec() as unknown as UserDocument[];
                 for (const user of users) {
                     enduranceEmitter.emit(enduranceEventTypes.LEVELLING_UPDATE_NICKNAME, { user });
                 }
@@ -146,14 +148,14 @@ class LevellingRouter extends EnduranceRouter {
 
         this.get('/init-quest', publicOptions, async (req: any, res: any) => {
             try {
-                const users = await User.find().exec() as unknown as UserDocument[];
+                const users = await UserModel.find().exec() as unknown as UserDocument[];
                 const quest = await Quest.findOne({ name: 'Welcome' }).exec();
                 if (!quest) {
                     throw new Error('Quest "Welcome" not found.');
                 }
 
                 for (const user of users) {
-                    await user.completeQuest(quest);
+                    await user.completeQuest(quest._id);
                 }
 
                 res.send('Quest initialized for all users');

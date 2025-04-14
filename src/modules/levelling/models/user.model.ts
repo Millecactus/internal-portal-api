@@ -3,6 +3,12 @@ import Quest from './quest.model.js';
 import Badge from './badge.model.js';
 import { Types } from 'mongoose';
 
+@EnduranceModelType.modelOptions({
+    schemaOptions: {
+        collection: 'users',
+        timestamps: true
+    }
+})
 class XPHistory extends EnduranceSchema {
     @EnduranceModelType.prop({ required: true })
     public amount!: number;
@@ -13,27 +19,50 @@ class XPHistory extends EnduranceSchema {
     @EnduranceModelType.prop({ required: true })
     public note!: string;
 
-    @EnduranceModelType.prop({ ref: () => Quest })
+    @EnduranceModelType.prop({ ref: 'Quest' })
     public questId?: Types.ObjectId;
 }
 
+@EnduranceModelType.modelOptions({
+    schemaOptions: {
+        collection: 'users',
+        timestamps: true
+    }
+})
 class CompletedQuest extends EnduranceSchema {
-    @EnduranceModelType.prop({ ref: () => Quest, required: true })
+    @EnduranceModelType.prop({ ref: 'Quest', required: true })
     public quest!: Types.ObjectId;
 
     @EnduranceModelType.prop({ required: true })
     public completionDate!: Date;
 }
 
+@EnduranceModelType.modelOptions({
+    schemaOptions: {
+        collection: 'users',
+        timestamps: true
+    }
+})
 class UserBadge extends EnduranceSchema {
-    @EnduranceModelType.prop({ ref: () => Badge, required: true })
+    @EnduranceModelType.prop({ ref: 'Badge', required: true })
     public badge!: Types.ObjectId;
 
     @EnduranceModelType.prop({ required: true })
     public awardedDate!: Date;
 }
 
+@EnduranceModelType.modelOptions({
+    schemaOptions: {
+        collection: 'users',
+        timestamps: true,
+        toObject: { virtuals: true },
+        toJSON: { virtuals: true }
+    }
+})
 class User extends EnduranceSchema {
+    @EnduranceModelType.prop({ required: true, unique: true })
+    public email!: string;
+
     @EnduranceModelType.prop({ required: true })
     public firstname!: string;
 
@@ -56,7 +85,7 @@ class User extends EnduranceSchema {
         return this.xpHistory.reduce((total, entry) => total + entry.amount, 0);
     }
 
-    public getLevel(): number {
+    public getLevel(this: EnduranceDocumentType<User>): number {
         let totalXP = this.getXP();
         let level = 1;
         const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
@@ -71,14 +100,14 @@ class User extends EnduranceSchema {
         return level;
     }
 
-    public getXPforNextLevel(): number {
+    public getXPforNextLevel(this: EnduranceDocumentType<User>): number {
         const level = this.getLevel();
         const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
         const coefficient = process.env.LEVELLING_COEFFICIENT ? parseFloat(process.env.LEVELLING_COEFFICIENT) : 1.3;
         return Math.floor(baseXP * Math.pow(coefficient, level - 1));
     }
 
-    public async addXP(this: EnduranceDocumentType<User>, amount: number, note: string, questId?: typeof Quest): Promise<void> {
+    public async addXP(this: EnduranceDocumentType<User>, amount: number, note: string, questId?: Types.ObjectId): Promise<void> {
         if (typeof amount !== 'number' || amount <= 0) {
             throw new Error('The amount must be a positive number.');
         }
@@ -86,10 +115,7 @@ class User extends EnduranceSchema {
             throw new Error('The note must be a non-empty string.');
         }
 
-        if (!Array.isArray(this.xpHistory)) {
-            this.xpHistory = [];
-        }
-
+        const xpHistory = this.get('xpHistory') || [];
         const levelBefore = this.getLevel();
 
         const entry = new XPHistory();
@@ -97,66 +123,212 @@ class User extends EnduranceSchema {
         entry.date = new Date();
         entry.note = note;
         if (questId) {
-            entry.questId = new Types.ObjectId(questId.toString());
+            entry.questId = questId;
         }
-        this.xpHistory.push(entry);
+        xpHistory.push(entry);
+        this.set('xpHistory', xpHistory);
 
         await this.save();
         const levelAfter = this.getLevel();
         if (levelAfter > levelBefore) {
-            enduranceEmitter.emit(enduranceEventTypes.LEVELLING_LEVEL_UP, { userId: this.id, newLevel: levelAfter });
+            enduranceEmitter.emit(enduranceEventTypes.LEVELLING_LEVEL_UP, { userId: this._id, newLevel: levelAfter });
         }
     }
 
-    public async completeQuest(this: EnduranceDocumentType<User>, questId: typeof Quest): Promise<void> {
+    public async completeQuest(this: EnduranceDocumentType<User>, questId: Types.ObjectId): Promise<void> {
         try {
             const quest = await Quest.findById(questId).populate('badgeReward').exec();
             if (!quest) {
                 throw new Error('Quest not found.');
             }
 
-            if (!Array.isArray(this.completedQuests)) {
-                this.completedQuests = [];
-            }
-
-            if (this.completedQuests.some(completedQuest => completedQuest.quest.toString() === questId.toString())) {
+            const completedQuests = this.get('completedQuests') || [];
+            if (completedQuests.some((completedQuest: any) => completedQuest.quest.toString() === questId.toString())) {
                 throw new Error('Quest has already been completed.');
             }
 
             const completedQuest = new CompletedQuest();
-            completedQuest.quest = new Types.ObjectId(questId.toString());
+            completedQuest.quest = questId;
             completedQuest.completionDate = new Date();
-            this.completedQuests.push(completedQuest);
+            completedQuests.push(completedQuest);
+            this.set('completedQuests', completedQuests);
 
             await this.addXP(quest.xpReward, `Completed quest: ${quest.name}`, questId);
 
             if (quest.badgeReward) {
-                if (!Array.isArray(this.badges)) {
-                    this.badges = [];
-                }
-                const badgeExists = this.badges.some(badge => badge.badge.toString() === (quest.badgeReward as any)?.toString());
-                if (!badgeExists && quest.badgeReward) {
-                    const userBadge = new UserBadge();
-                    userBadge.badge = new Types.ObjectId((quest.badgeReward as any).toString());
-                    userBadge.awardedDate = new Date();
-                    this.badges.push(userBadge);
+                const badges = this.get('badges') || [];
+
+                // Rechercher le badge dans la base de données
+                const badgeDoc = await Badge.findById(quest.badgeReward).exec();
+                if (badgeDoc) {
+                    const badgeExists = badges.some((badge: any) => badge.badge.toString() === quest.badgeReward?.toString());
+                    if (!badgeExists) {
+                        const userBadge = new UserBadge();
+                        userBadge.badge = quest.badgeReward;
+                        userBadge.awardedDate = new Date();
+                        badges.push(userBadge);
+                        this.set('badges', badges);
+                    }
                 }
             }
 
             await this.save();
+
+            // Récupérer le nom du badge si nécessaire
+            let badgeName;
+            if (quest.badgeReward) {
+                const badgeDoc = await Badge.findById(quest.badgeReward).exec();
+                badgeName = badgeDoc?.name;
+            }
+
             enduranceEmitter.emit(enduranceEventTypes.LEVELLING_QUEST_COMPLETED, {
-                firstname: this.firstname,
-                lastname: this.lastname,
+                firstname: this.get('firstname'),
+                lastname: this.get('lastname'),
                 questName: quest.name,
-                badgeName: quest.badgeReward ? (quest.badgeReward as any).name : undefined
+                badgeName: badgeName
             });
-            console.log(`Quest completed: ${quest.name} for user ${this.id}`);
+            console.log(`Quest completed: ${quest.name} for user ${this._id}`);
         } catch (error) {
-            console.error(`Error completing quest for user ${this.id}:`, error);
+            console.error(`Error completing quest for user ${this._id}:`, error);
             throw error;
         }
     }
 }
 
-const UserModel = EnduranceModelType.getModelForClass(User);
+const UserModel = EnduranceModelType.getModelForClass(User, {
+    schemaOptions: {
+        collection: 'users',
+        timestamps: true,
+        toObject: { virtuals: true },
+        toJSON: { virtuals: true }
+    }
+});
+
+// Ajout des méthodes en tant que méthodes d'instance du modèle Mongoose
+UserModel.prototype.getXP = function (this: EnduranceDocumentType<User>): number {
+    // Utiliser la méthode get() de Mongoose pour accéder à xpHistory
+    const xpHistory = (this as any).get('xpHistory');
+
+    const xpHistoryArray = xpHistory && Array.isArray(xpHistory) ? xpHistory : [];
+
+    return xpHistoryArray.reduce((total: number, entry: any) => {
+        if (entry && typeof entry.amount === 'number') {
+            return total + entry.amount;
+        }
+        return total;
+    }, 0);
+};
+
+UserModel.prototype.getLevel = function (this: EnduranceDocumentType<User>): number {
+    let totalXP = this.getXP();
+    let level = 1;
+    const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
+    const coefficient = process.env.LEVELLING_COEFFICIENT ? parseFloat(process.env.LEVELLING_COEFFICIENT) : 1.3;
+    let xpForNextLevel = baseXP;
+
+    while (totalXP >= xpForNextLevel) {
+        totalXP -= xpForNextLevel;
+        level++;
+        xpForNextLevel = Math.floor(baseXP * Math.pow(coefficient, level - 1));
+    }
+    return level;
+};
+
+UserModel.prototype.getXPforNextLevel = function (): number {
+    const level = this.getLevel();
+    const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
+    const coefficient = process.env.LEVELLING_COEFFICIENT ? parseFloat(process.env.LEVELLING_COEFFICIENT) : 1.3;
+    return Math.floor(baseXP * Math.pow(coefficient, level - 1));
+};
+
+UserModel.prototype.addXP = async function (amount: number, note: string, questId?: Types.ObjectId): Promise<void> {
+    if (typeof amount !== 'number' || amount <= 0) {
+        throw new Error('The amount must be a positive number.');
+    }
+    if (typeof note !== 'string' || note.trim() === '') {
+        throw new Error('The note must be a non-empty string.');
+    }
+
+    if (!Array.isArray(this.xpHistory)) {
+        this.xpHistory = [];
+    }
+
+    const levelBefore = this.getLevel();
+
+    const entry = new XPHistory();
+    entry.amount = amount;
+    entry.date = new Date();
+    entry.note = note;
+    if (questId) {
+        entry.questId = questId;
+    }
+    this.xpHistory.push(entry);
+
+    await this.save();
+    const levelAfter = this.getLevel();
+    if (levelAfter > levelBefore) {
+        enduranceEmitter.emit(enduranceEventTypes.LEVELLING_LEVEL_UP, { userId: this._id, newLevel: levelAfter });
+    }
+};
+
+UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<User>, questId: Types.ObjectId): Promise<void> {
+    try {
+        const quest = await Quest.findById(questId).populate('badgeReward').exec();
+        if (!quest) {
+            throw new Error('Quest not found.');
+        }
+
+        const completedQuests = this.get('completedQuests') || [];
+        if (completedQuests.some((completedQuest: any) => completedQuest.quest.toString() === questId.toString())) {
+            throw new Error('Quest has already been completed.');
+        }
+
+        const completedQuest = new CompletedQuest();
+        completedQuest.quest = questId;
+        completedQuest.completionDate = new Date();
+        completedQuests.push(completedQuest);
+        this.set('completedQuests', completedQuests);
+
+        await this.addXP(quest.xpReward, `Completed quest: ${quest.name}`, questId);
+
+        if (quest.badgeReward) {
+            const badges = this.get('badges') || [];
+
+            // Rechercher le badge dans la base de données
+            const badgeDoc = await Badge.findById(quest.badgeReward).exec();
+            if (badgeDoc) {
+                const badgeExists = badges.some((badge: any) => badge.badge.toString() === quest.badgeReward?.toString());
+                if (!badgeExists) {
+                    const userBadge = new UserBadge();
+                    userBadge.badge = quest.badgeReward;
+                    userBadge.awardedDate = new Date();
+                    badges.push(userBadge);
+                    this.set('badges', badges);
+                }
+            }
+        }
+
+        await this.save();
+
+        // Récupérer le nom du badge si nécessaire
+        let badgeName;
+        if (quest.badgeReward) {
+            const badgeDoc = await Badge.findById(quest.badgeReward).exec();
+            badgeName = badgeDoc?.name;
+        }
+
+        enduranceEmitter.emit(enduranceEventTypes.LEVELLING_QUEST_COMPLETED, {
+            firstname: this.get('firstname'),
+            lastname: this.get('lastname'),
+            questName: quest.name,
+            badgeName: badgeName
+        });
+        console.log(`Quest completed: ${quest.name} for user ${this._id}`);
+    } catch (error) {
+        console.error(`Error completing quest for user ${this._id}:`, error);
+        throw error;
+    }
+};
+
 export default UserModel;
+export type UserDocument = EnduranceDocumentType<User>;
