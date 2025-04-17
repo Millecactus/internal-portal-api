@@ -43,8 +43,6 @@ class LevellingRouter extends EnduranceRouter {
                     return res.status(404).send('Utilisateur non trouvé');
                 }
 
-                console.log(fullUser);
-                console.log(typeof fullUser);
                 res.json({
                     email: fullUser.email,
                     xpHistory: fullUser.get('xpHistory'),
@@ -63,14 +61,20 @@ class LevellingRouter extends EnduranceRouter {
             try {
                 const userEmail = req.user.email;
                 const user = await UserModel.findOne({ email: userEmail })
-                    .populate('completedQuests.quest',)
+                    .populate({
+                        path: 'completedQuests.quest',
+                        model: Quest,
+                        options: { strictPopulate: false }
+                    })
                     .exec() as unknown as UserDocument;
 
                 if (!user) {
                     return res.status(404).send('Utilisateur non trouvé');
                 }
 
-                const completedQuestIds = user.completedQuests.map(quest => quest.quest._id);
+                const completedQuestIds = Array.isArray(user.completedQuests)
+                    ? user.completedQuests.map(quest => quest.quest._id)
+                    : [];
                 const availableQuests = await Quest.find({ _id: { $nin: completedQuestIds }, status: 'open' }).exec();
 
                 res.json(availableQuests);

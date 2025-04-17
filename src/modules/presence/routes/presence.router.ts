@@ -86,10 +86,8 @@ class PresenceRouter extends EnduranceRouter {
         });
 
         this.post('/presence', authenticatedOptions, async (req: any, res: any) => {
-            console.log("post presence");
             try {
 
-                console.log("try", req.user);
                 const userId = req.user._id;
                 const { date, type } = req.body;
 
@@ -104,9 +102,6 @@ class PresenceRouter extends EnduranceRouter {
                 const startOfDay = moment(date).startOf('day').toDate();
                 const endOfDay = moment(date).endOf('day').toDate();
 
-                console.log("startOfDay", startOfDay);
-                console.log("endOfDay", endOfDay);
-
                 const existingPresences = await Presence.find({
                     user: userId,
                     date: {
@@ -116,7 +111,6 @@ class PresenceRouter extends EnduranceRouter {
                 });
 
                 if (existingPresences.length === 0) {
-                    console.log("no existing presences");
                     const morningPresence = new Presence({
                         user: userId,
                         date: moment(date).hour(1).minute(0).second(0).toDate(),
@@ -129,8 +123,6 @@ class PresenceRouter extends EnduranceRouter {
                         type: type
                     });
 
-                    console.log('morningPresence', morningPresence);
-                    console.log('afternoonPresence', afternoonPresence);
                     await morningPresence.save();
                     await afternoonPresence.save();
 
@@ -142,7 +134,6 @@ class PresenceRouter extends EnduranceRouter {
                     date: moment(date).toDate(),
                     type: type
                 });
-                console.log('newPresence', newPresence);
                 await newPresence.save();
                 res.status(201).json(newPresence);
             } catch (error) {
