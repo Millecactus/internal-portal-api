@@ -1,7 +1,6 @@
-import { enduranceEmitter, enduranceEventTypes, EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from 'endurance-core';
+import { enduranceEmitter, enduranceEventTypes, EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
 import Quest from './quest.model.js';
 import Badge from './badge.model.js';
-import { Types } from 'mongoose';
 
 @EnduranceModelType.modelOptions({
     schemaOptions: {
@@ -20,7 +19,7 @@ class XPHistory extends EnduranceSchema {
     public note!: string;
 
     @EnduranceModelType.prop({ ref: 'Quest' })
-    public questId?: Types.ObjectId;
+    public questId?: ObjectId;
 }
 
 @EnduranceModelType.modelOptions({
@@ -31,7 +30,7 @@ class XPHistory extends EnduranceSchema {
 })
 class CompletedQuest extends EnduranceSchema {
     @EnduranceModelType.prop({ ref: 'Quest', required: true })
-    public quest!: Types.ObjectId;
+    public quest!: ObjectId;
 
     @EnduranceModelType.prop({ required: true })
     public completionDate!: Date;
@@ -45,7 +44,7 @@ class CompletedQuest extends EnduranceSchema {
 })
 class UserBadge extends EnduranceSchema {
     @EnduranceModelType.prop({ ref: 'Badge', required: true })
-    public badge!: Types.ObjectId;
+    public badge!: ObjectId;
 
     @EnduranceModelType.prop({ required: true })
     public awardedDate!: Date;
@@ -107,7 +106,7 @@ class User extends EnduranceSchema {
         return Math.floor(baseXP * Math.pow(coefficient, level - 1));
     }
 
-    public async addXP(this: EnduranceDocumentType<User>, amount: number, note: string, questId?: Types.ObjectId): Promise<void> {
+    public async addXP(this: EnduranceDocumentType<User>, amount: number, note: string, questId?: ObjectId): Promise<void> {
         if (typeof amount !== 'number' || amount <= 0) {
             throw new Error('The amount must be a positive number.');
         }
@@ -135,7 +134,7 @@ class User extends EnduranceSchema {
         }
     }
 
-    public async completeQuest(this: EnduranceDocumentType<User>, questId: Types.ObjectId): Promise<void> {
+    public async completeQuest(this: EnduranceDocumentType<User>, questId: ObjectId): Promise<void> {
         try {
             const quest = await Quest.findById(questId).populate('badgeReward').exec();
             if (!quest) {
@@ -241,7 +240,7 @@ UserModel.prototype.getXPforNextLevel = function (): number {
     return Math.floor(baseXP * Math.pow(coefficient, level - 1));
 };
 
-UserModel.prototype.addXP = async function (amount: number, note: string, questId?: Types.ObjectId): Promise<void> {
+UserModel.prototype.addXP = async function (amount: number, note: string, questId?: ObjectId): Promise<void> {
     if (typeof amount !== 'number' || amount <= 0) {
         throw new Error('The amount must be a positive number.');
     }
@@ -271,7 +270,7 @@ UserModel.prototype.addXP = async function (amount: number, note: string, questI
     }
 };
 
-UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<User>, questId: Types.ObjectId): Promise<void> {
+UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<User>, questId: ObjectId): Promise<void> {
     try {
         const quest = await Quest.findById(questId).populate('badgeReward').exec();
         if (!quest) {

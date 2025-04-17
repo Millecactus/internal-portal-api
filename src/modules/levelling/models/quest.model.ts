@@ -1,7 +1,5 @@
-import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from 'endurance-core';
-import Badge from './badge.model.js';
+import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
 import User from './user.model.js';
-import { Types } from 'mongoose';
 
 @EnduranceModelType.pre<Quest & { isNew: boolean }>('save', async function (this: EnduranceDocumentType<Quest> & { isNew: boolean }, next) {
     if (this.isNew) {
@@ -45,7 +43,7 @@ class Quest extends EnduranceSchema {
     public xpReward!: number;
 
     @EnduranceModelType.prop({ ref: 'Badge' })
-    public badgeReward?: Types.ObjectId;
+    public badgeReward?: ObjectId;
 
     @EnduranceModelType.prop({ required: true, enum: ['draft', 'open', 'closed'], default: 'open' })
     public status!: string;
