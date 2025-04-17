@@ -60,7 +60,7 @@ class CooptationRouter extends EnduranceRouter {
                 });
 
                 // Envoyer un message à Discord pour notifier de la nouvelle cooptation
-                const discordWebhooks = process.env.COOPTATION_WEBHOOKS;
+                /*const discordWebhooks = process.env.COOPTATION_DISCORD_WEBHOOKS;
 
                 if (discordWebhooks) {
                     const discordWebhooksArray = discordWebhooks.split(";");
@@ -78,6 +78,38 @@ class CooptationRouter extends EnduranceRouter {
                             });
                         } catch (error) {
                             console.error('Erreur lors de l\'envoi du message à Discord:', error);
+                        }
+                    }
+                }*/
+
+                const pipedriveWebhooks = process.env.COOPTATION_PIPEDRIVE_WEBHOOKS;
+
+                if (pipedriveWebhooks) {
+                    const pipedriveWebhooksArray = pipedriveWebhooks.split(";");
+
+                    for (const webhook of pipedriveWebhooksArray) {
+                        try {
+                            console.log(webhook);
+                            const response = await fetch(webhook, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'User-Agent': 'my.programisto.fr'
+                                },
+                                body: JSON.stringify({
+                                    "cooptation-firstname": cooptation.firstname,
+                                    "cooptation-lastname": cooptation.lastname,
+                                    "cooptation-email": cooptation.email,
+                                    "cooptation-tel": cooptation.phone,
+                                    "your-linkedin-url": cooptation.linkedinUrl,
+                                    "your-message": cooptation.note,
+                                    "programisto-email": req.user.email
+                                }),
+                            });
+                            const result = await response.json();
+                            console.log('Résultat de l\'envoi à Pipedrive:', result);
+                        } catch (error) {
+                            console.error('Erreur lors de l\'envoi du message à N8N:', error);
                         }
                     }
                 }
