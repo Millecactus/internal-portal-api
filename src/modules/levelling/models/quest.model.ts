@@ -1,14 +1,6 @@
 import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
 import User from './user.model.js';
 
-@EnduranceModelType.pre<Quest & { isNew: boolean }>('save', async function (this: EnduranceDocumentType<Quest> & { isNew: boolean }, next) {
-    if (this.isNew) {
-        const lastQuest = await QuestModel.findOne().sort({ id: -1 }).exec();
-        this.id = lastQuest ? lastQuest.id + 1 : 1;
-    }
-    next();
-})
-
 @EnduranceModelType.pre<Quest>('deleteOne', async function (this: EnduranceDocumentType<Quest>, next) {
     try {
         const users = await User.find({ 'completedQuests.quest': this.id }).exec();
@@ -24,8 +16,6 @@ import User from './user.model.js';
 })
 
 class Quest extends EnduranceSchema {
-    @EnduranceModelType.prop({ required: true, unique: true })
-    public id!: number;
 
     @EnduranceModelType.prop({ required: true })
     public name!: string;

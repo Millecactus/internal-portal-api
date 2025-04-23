@@ -27,8 +27,8 @@ async function fetchNews(): Promise<Article[]> {
   const url = `https://newsapi.org/v2/top-headlines?q=&from=${from}&to=${to}&sortBy=popularity&apiKey=${process.env.DAILY_NEWS_NEWSAPI_KEY}&language=en&sources=${sources}`;
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    const any = await fetch(url);
+    const data = await any.json();
     const articles: Article[] = data.articles.slice(0, 10);
     return articles;
   } catch (error) {

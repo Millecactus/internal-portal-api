@@ -32,8 +32,8 @@ async function fetchWeather(): Promise<WeatherData[]> {
     const weatherResults: WeatherData[] = [];
     for (const weatherLocationToFetch of weatherLocationsToFetch) {
       try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?cnt=1&units=metric&lang=en&lat=${weatherLocationToFetch.latitude}&lon=${weatherLocationToFetch.longitude}&appid=${process.env.DAILY_WEATHER_OPENWEATHER_KEY}`);
-        const weatherResult = await response.json();
+        const any = await fetch(`https://api.openweathermap.org/data/2.5/weather?cnt=1&units=metric&lang=en&lat=${weatherLocationToFetch.latitude}&lon=${weatherLocationToFetch.longitude}&appid=${process.env.DAILY_WEATHER_OPENWEATHER_KEY}`);
+        const weatherResult = await any.json();
         weatherResult.city = weatherLocationToFetch.city;
         weatherResult.emoji = weatherLocationToFetch.emoji;
         weatherResults.push(weatherResult);

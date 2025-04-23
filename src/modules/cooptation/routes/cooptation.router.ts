@@ -90,7 +90,7 @@ class CooptationRouter extends EnduranceRouter {
                     for (const webhook of pipedriveWebhooksArray) {
                         try {
                             console.log(webhook);
-                            const response = await fetch(webhook, {
+                            const any = await fetch(webhook, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ class CooptationRouter extends EnduranceRouter {
                                     "programisto-email": req.user.email
                                 }),
                             });
-                            const result = await response.json();
+                            const result = await any.json();
                             console.log('Résultat de l\'envoi à Pipedrive:', result);
                         } catch (error) {
                             console.error('Erreur lors de l\'envoi du message à N8N:', error);

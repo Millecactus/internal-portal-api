@@ -5,7 +5,9 @@ import Badge from './badge.model.js';
 @EnduranceModelType.modelOptions({
     schemaOptions: {
         collection: 'users',
-        timestamps: true
+        timestamps: true,
+        _id: true,
+        validateBeforeSave: false
     }
 })
 class XPHistory extends EnduranceSchema {
@@ -25,7 +27,9 @@ class XPHistory extends EnduranceSchema {
 @EnduranceModelType.modelOptions({
     schemaOptions: {
         collection: 'users',
-        timestamps: true
+        timestamps: true,
+        _id: true,
+        validateBeforeSave: false
     }
 })
 class CompletedQuest extends EnduranceSchema {
@@ -39,7 +43,9 @@ class CompletedQuest extends EnduranceSchema {
 @EnduranceModelType.modelOptions({
     schemaOptions: {
         collection: 'users',
-        timestamps: true
+        timestamps: true,
+        _id: true,
+        validateBeforeSave: false
     }
 })
 class UserBadge extends EnduranceSchema {
@@ -55,7 +61,9 @@ class UserBadge extends EnduranceSchema {
         collection: 'users',
         timestamps: true,
         toObject: { virtuals: true },
-        toJSON: { virtuals: true }
+        toJSON: { virtuals: true },
+        _id: true,
+        validateBeforeSave: false
     }
 })
 class User extends EnduranceSchema {
@@ -107,6 +115,7 @@ class User extends EnduranceSchema {
     }
 
     public async addXP(this: EnduranceDocumentType<User>, amount: number, note: string, questId?: ObjectId): Promise<void> {
+        console.log("ADD XP");
         if (typeof amount !== 'number' || amount <= 0) {
             throw new Error('The amount must be a positive number.');
         }
@@ -125,6 +134,7 @@ class User extends EnduranceSchema {
             entry.questId = questId;
         }
         xpHistory.push(entry);
+        console.log("BEFORE SET XP HISTORY");
         this.set('xpHistory', xpHistory);
 
         await this.save();
@@ -135,12 +145,14 @@ class User extends EnduranceSchema {
     }
 
     public async completeQuest(this: EnduranceDocumentType<User>, questId: ObjectId): Promise<void> {
+        console.log("COMPLETE QUEST");
         try {
+            console.log("BEFORE QUEST");
             const quest = await Quest.findById(questId).populate('badgeReward').exec();
             if (!quest) {
                 throw new Error('Quest not found.');
             }
-
+            console.log("BEFORE COMPLETED QUEST");
             const completedQuests = this.get('completedQuests') || [];
             if (completedQuests.some((completedQuest: any) => completedQuest.quest.toString() === questId.toString())) {
                 throw new Error('Quest has already been completed.');
@@ -160,7 +172,11 @@ class User extends EnduranceSchema {
                 // Rechercher le badge dans la base de données
                 const badgeDoc = await Badge.findById(quest.badgeReward).exec();
                 if (badgeDoc) {
-                    const badgeExists = badges.some((badge: any) => badge.badge.toString() === quest.badgeReward?.toString());
+                    // Vérifier si le badge existe déjà dans l'array badges
+                    const badgeExists = badges.some((userBadge: any) =>
+                        userBadge.badge.toString() === quest.badgeReward?.toString()
+                    );
+
                     if (!badgeExists) {
                         const userBadge = new UserBadge();
                         userBadge.badge = quest.badgeReward;
@@ -170,7 +186,7 @@ class User extends EnduranceSchema {
                     }
                 }
             }
-
+            console.log("BEFORE SAVE");
             await this.save();
 
             // Récupérer le nom du badge si nécessaire
@@ -262,7 +278,6 @@ UserModel.prototype.addXP = async function (amount: number, note: string, questI
         entry.questId = questId;
     }
     this.xpHistory.push(entry);
-
     await this.save();
     const levelAfter = this.getLevel();
     if (levelAfter > levelBefore) {
@@ -276,7 +291,6 @@ UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<
         if (!quest) {
             throw new Error('Quest not found.');
         }
-
         const completedQuests = this.get('completedQuests') || [];
         if (completedQuests.some((completedQuest: any) => completedQuest.quest.toString() === questId.toString())) {
             throw new Error('Quest has already been completed.');
@@ -287,16 +301,18 @@ UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<
         completedQuest.completionDate = new Date();
         completedQuests.push(completedQuest);
         this.set('completedQuests', completedQuests);
-
         await this.addXP(quest.xpReward, `Completed quest: ${quest.name}`, questId);
-
         if (quest.badgeReward) {
             const badges = this.get('badges') || [];
 
             // Rechercher le badge dans la base de données
             const badgeDoc = await Badge.findById(quest.badgeReward).exec();
             if (badgeDoc) {
-                const badgeExists = badges.some((badge: any) => badge.badge.toString() === quest.badgeReward?.toString());
+                // Vérifier si le badge existe déjà dans l'array badges
+                const badgeExists = badges.some((userBadge: any) =>
+                    userBadge.badge.toString() === quest.badgeReward?.toString()
+                );
+
                 if (!badgeExists) {
                     const userBadge = new UserBadge();
                     userBadge.badge = quest.badgeReward;
@@ -306,7 +322,6 @@ UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<
                 }
             }
         }
-
         await this.save();
 
         // Récupérer le nom du badge si nécessaire

@@ -26,19 +26,15 @@ import User from './user.model.js';
     }
 })
 class Badge extends EnduranceSchema {
-    @EnduranceModelType.prop({
-        required: true, unique: true, default: async function () {
-            const lastBadge = await BadgeModel.findOne().sort({ id: -1 }).exec();
-            return lastBadge ? lastBadge.id + 1 : 1;
-        }
-    })
-    public id!: number;
 
     @EnduranceModelType.prop({ required: true })
     public name!: string;
 
     @EnduranceModelType.prop({ required: true })
     public description!: string;
+
+    @EnduranceModelType.prop({ required: false })
+    public imageUrl!: string;
 
     public static getModel() {
         return BadgeModel;

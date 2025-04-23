@@ -2,7 +2,7 @@ import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMi
 import Presence from '../models/presence.model.js';
 import moment from 'moment';
 
-interface PresenceResponse {
+interface Presenceany {
     user: {
         firstname: string;
         lastname: string;
@@ -64,7 +64,7 @@ class PresenceRouter extends EnduranceRouter {
                     .populate('user', 'firstname lastname')
                     .exec();
 
-                const presencesRegroupees: PresenceResponse[] = [];
+                const presencesRegroupees: Presenceany[] = [];
                 for (const presence of presences) {
                     const user = presence.user as unknown as { firstname: string; lastname: string };
                     if (!presencesRegroupees.find(p => p.user.firstname === user.firstname && p.user.lastname === user.lastname)) {

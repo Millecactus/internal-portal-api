@@ -210,7 +210,7 @@ class LevellingRouter extends EnduranceRouter {
                 const startMonth = req.query.startMonth || defaultStartMonth;
                 const endMonth = req.query.endMonth || defaultEndMonth;
 
-                const response = await fetch(`https://ui.boondmanager.com/api/times-reports?startMonth=${startMonth}&endMonth=${endMonth}`, {
+                const any = await fetch(`https://ui.boondmanager.com/api/times-reports?startMonth=${startMonth}&endMonth=${endMonth}`, {
                     method: 'GET',
                     headers: {
                         'X-Jwt-Client-Boondmanager': jwt,
@@ -218,14 +218,14 @@ class LevellingRouter extends EnduranceRouter {
                     }
                 });
 
-                if (!response.ok) {
-                    const xDebugBoondmanager = response.headers.get('x-Debug-Boondmanager');
+                if (!any.ok) {
+                    const xDebugBoondmanager = any.headers.get('x-Debug-Boondmanager');
                     console.log('x-Debug-Boondmanager header:', xDebugBoondmanager);
-                    console.error(`Error fetching times reports: ${response.status} - ${response.statusText}`);
+                    console.error(`Error fetching times reports: ${any.status} - ${any.statusText}`);
                     throw new Error('Error fetching times reports');
                 }
 
-                const data = await response.json();
+                const data = await any.json();
                 res.json(data);
             } catch (error) {
                 console.error('Error fetching times reports:', error);
