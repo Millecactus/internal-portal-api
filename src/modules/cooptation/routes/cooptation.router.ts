@@ -1,5 +1,6 @@
 import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
 import Cooptation from '../models/cooptation.model.js';
+import User from '../models/user.model.js';
 
 class CooptationRouter extends EnduranceRouter {
     constructor() {
@@ -58,6 +59,19 @@ class CooptationRouter extends EnduranceRouter {
                         cooptation_note: cooptation.note
                     }
                 });
+
+                const cooptationUser = await User.findById(cooptation.cooptationUserId);
+                if (cooptationUser) {
+                    enduranceEmitter.emit(enduranceEventTypes.SEND_EMAIL, {
+                        template: 'cooptation-received',
+                        to: cooptationUser.email,
+                        subject: 'Cooptation reçue - My Programisto',
+                        data: {
+                            user_name: req.user.firstname + ' ' + req.user.lastname,
+                            cooptation_name: cooptation.firstname + ' ' + cooptation.lastname
+                        }
+                    });
+                }
 
                 // Envoyer un message à Discord pour notifier de la nouvelle cooptation
                 /*const discordWebhooks = process.env.COOPTATION_DISCORD_WEBHOOKS;

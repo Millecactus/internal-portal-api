@@ -1,6 +1,6 @@
-import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions, EnduranceDocumentType } from 'endurance-core';
+import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
 import { ObjectId } from 'mongodb';
-import UserModel, { UserDocument } from '../models/user.model.js';
+import UserModel from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
 import Badge from '../models/badge.model.js';
 
@@ -17,8 +17,50 @@ class LevellingAdminRouter extends EnduranceRouter {
 
         this.get('/badges', authenticatedOptions, async (req: any, res: any) => {
             try {
-                const badges = await Badge.find({}).sort({ createdAt: -1 });
-                return res.json(badges);
+                const page = parseInt(req.query.page as string) || 1;
+                const limit = parseInt(req.query.limit as string) || 10;
+                const skip = (page - 1) * limit;
+                const search = req.query.search as string || '';
+                const sortBy = req.query.sortBy as string || 'updatedAt';
+                const sortOrder = req.query.sortOrder as string || 'desc';
+
+                // Construction de la requête de recherche
+                const query: any = {};
+
+                // Recherche sur nom et description
+                if (search) {
+                    query.$or = [
+                        { name: { $regex: search, $options: 'i' } },
+                        { description: { $regex: search, $options: 'i' } }
+                    ];
+                }
+
+                // Construction du tri
+                const sortOptions: Record<string, 1 | -1> = {
+                    [sortBy]: sortOrder === 'asc' ? 1 : -1
+                };
+
+                const [badges, total] = await Promise.all([
+                    Badge.find(query)
+                        .sort(sortOptions)
+                        .skip(skip)
+                        .limit(limit),
+                    Badge.countDocuments(query)
+                ]);
+
+                const totalPages = Math.ceil(total / limit);
+
+                return res.json({
+                    data: badges,
+                    pagination: {
+                        currentPage: page,
+                        totalPages,
+                        totalItems: total,
+                        itemsPerPage: limit,
+                        hasNextPage: page < totalPages,
+                        hasPreviousPage: page > 1
+                    }
+                });
             } catch (error) {
                 console.error('Error fetching badges:', error);
                 res.status(500).send('Internal Server Error');
@@ -68,9 +110,56 @@ class LevellingAdminRouter extends EnduranceRouter {
 
         this.get('/quests', authenticatedOptions, async (req: any, res: any) => {
             try {
-                const quests = await Quest.find({}).sort({ updatedAt: -1, startDate: -1 });
-                console.log(quests.map(quest => quest["name"]));
-                return res.json(quests);
+                const page = parseInt(req.query.page as string) || 1;
+                const limit = parseInt(req.query.limit as string) || 10;
+                const skip = (page - 1) * limit;
+                const search = req.query.search as string || '';
+                const status = req.query.status as string || 'all';
+                const sortBy = req.query.sortBy as string || 'updatedAt';
+                const sortOrder = req.query.sortOrder as string || 'desc';
+
+                // Construction de la requête de recherche
+                const query: any = {};
+
+                // Filtre par statut
+                if (status !== 'all') {
+                    query.status = status;
+                }
+
+                // Recherche sur nom et description
+                if (search) {
+                    query.$or = [
+                        { name: { $regex: search, $options: 'i' } },
+                        { description: { $regex: search, $options: 'i' } }
+                    ];
+                }
+
+                // Construction du tri
+                const sortOptions: Record<string, 1 | -1> = {
+                    [sortBy]: sortOrder === 'asc' ? 1 : -1
+                };
+
+                const [quests, total] = await Promise.all([
+                    Quest.find(query)
+                        .sort(sortOptions)
+                        .skip(skip)
+                        .limit(limit),
+                    Quest.countDocuments(query)
+                ]);
+
+                const totalPages = Math.ceil(total / limit);
+
+                return res.json({
+                    data: quests,
+                    pagination: {
+                        currentPage: page,
+                        totalPages,
+                        totalItems: total,
+                        itemsPerPage: limit,
+                        hasNextPage: page < totalPages,
+                        hasPreviousPage: page > 1
+                    }
+                });
             } catch (error) {
                 console.error('Error fetching quests:', error);
                 res.status(500).send('Internal Server Error');
