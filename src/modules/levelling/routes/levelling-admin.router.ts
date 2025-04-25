@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import UserModel from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
 import Badge from '../models/badge.model.js';
+import Group from '../models/group.model.js';
 
 class LevellingAdminRouter extends EnduranceRouter {
     constructor() {
@@ -213,6 +214,116 @@ class LevellingAdminRouter extends EnduranceRouter {
                 return res.json(users);
             } catch (error) {
                 console.error('Error fetching users:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+
+        this.get('/autocomplete-groups', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const groups = await Group.find({}).sort({ name: 1 });
+                return res.json(groups);
+            } catch (error) {
+                console.error('Error fetching groups:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+
+        this.post('/quests/:id/assign-users', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const { userIds } = req.body;
+                const questId = req.params.id;
+
+                if (!userIds || !Array.isArray(userIds)) {
+                    return res.status(400).json({ error: 'userIds must be an array' });
+                }
+
+                const quest = await Quest.findById(questId);
+                if (!quest) {
+                    return res.status(404).json({ error: 'Quest not found' });
+                }
+
+                const validUserIds = userIds.map(id => new ObjectId(id));
+                quest.assignedUsers = [...new Set([...quest.assignedUsers || [], ...validUserIds])];
+                await quest.save();
+
+                return res.json(quest);
+            } catch (error) {
+                console.error('Error assigning users to quest:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+
+        this.post('/quests/:id/assign-groups', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const { groupIds } = req.body;
+                const questId = req.params.id;
+
+                if (!groupIds || !Array.isArray(groupIds)) {
+                    return res.status(400).json({ error: 'groupIds must be an array' });
+                }
+
+                const quest = await Quest.findById(questId);
+                if (!quest) {
+                    return res.status(404).json({ error: 'Quest not found' });
+                }
+
+                const validGroupIds = groupIds.map(id => new ObjectId(id));
+                quest.assignedGroups = [...new Set([...quest.assignedGroups || [], ...validGroupIds])];
+                await quest.save();
+
+                return res.json(quest);
+            } catch (error) {
+                console.error('Error assigning groups to quest:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+
+        this.delete('/quests/:id/assign-users', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const { userIds } = req.body;
+                const questId = req.params.id;
+
+                if (!userIds || !Array.isArray(userIds)) {
+                    return res.status(400).json({ error: 'userIds must be an array' });
+                }
+
+                const quest = await Quest.findById(questId);
+                if (!quest) {
+                    return res.status(404).json({ error: 'Quest not found' });
+                }
+
+                const validUserIds = userIds.map(id => new ObjectId(id));
+                quest.assignedUsers = (quest.assignedUsers || []).filter(id => !validUserIds.includes(id));
+                await quest.save();
+
+                return res.json(quest);
+            } catch (error) {
+                console.error('Error unassigning users from quest:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+
+        this.delete('/quests/:id/assign-groups', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const { groupIds } = req.body;
+                const questId = req.params.id;
+
+                if (!groupIds || !Array.isArray(groupIds)) {
+                    return res.status(400).json({ error: 'groupIds must be an array' });
+                }
+
+                const quest = await Quest.findById(questId);
+                if (!quest) {
+                    return res.status(404).json({ error: 'Quest not found' });
+                }
+
+                const validGroupIds = groupIds.map(id => new ObjectId(id));
+                quest.assignedGroups = (quest.assignedGroups || []).filter(id => !validGroupIds.includes(id));
+                await quest.save();
+
+                return res.json(quest);
+            } catch (error) {
+                console.error('Error unassigning groups from quest:', error);
                 res.status(500).send('Internal Server Error');
             }
         });

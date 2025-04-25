@@ -169,7 +169,7 @@ class LevellingRouter extends EnduranceRouter {
             }
         });
 
-        this.get('/timesheet', publicOptions, async (req: any, res: any) => {
+        /*this.get('/timesheet', publicOptions, async (req: any, res: any) => {
             try {
                 const boondManagerKey = process.env.BOONDMANAGER_CLIENT_KEY;
                 const userToken = process.env.BOONDMANAGER_USER_TOKEN;
@@ -231,7 +231,7 @@ class LevellingRouter extends EnduranceRouter {
                 console.error('Error fetching times reports:', error);
                 res.status(500).send('Error fetching times reports');
             }
-        });
+        });*/
     }
 }
 

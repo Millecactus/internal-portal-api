@@ -1,5 +1,7 @@
 import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
 import User from './user.model.js';
+import Group from './group.model.js';
+import { Types } from 'mongoose';
 
 @EnduranceModelType.pre<Quest>('deleteOne', async function (this: EnduranceDocumentType<Quest>, next) {
     try {
@@ -40,6 +42,12 @@ class Quest extends EnduranceSchema {
 
     @EnduranceModelType.prop({ min: 7, max: 16, default: 12 })
     public lootboxHour?: number;
+
+    @EnduranceModelType.prop({ type: [Types.ObjectId], ref: 'User', default: [], required: false })
+    public assignedUsers?: Types.ObjectId[];
+
+    @EnduranceModelType.prop({ type: [Types.ObjectId], ref: 'Group', default: [], required: false })
+    public assignedGroups?: Types.ObjectId[];
 
     static async getTodayQuestWithLootboxHour(): Promise<Quest | null> {
         try {
