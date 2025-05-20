@@ -1,6 +1,7 @@
 import { enduranceEmitter, enduranceEventTypes, EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
 import Quest from './quest.model.js';
 import Badge from './badge.model.js';
+import { Types } from 'mongoose';
 
 @EnduranceModelType.modelOptions({
     schemaOptions: {
@@ -87,6 +88,9 @@ class User extends EnduranceSchema {
 
     @EnduranceModelType.prop({ type: () => [UserBadge] })
     public badges!: UserBadge[];
+
+    @EnduranceModelType.prop({ type: [Types.ObjectId], ref: 'Group', default: [] })
+    public groups?: Types.ObjectId[];
 
     public getXP(): number {
         return this.xpHistory.reduce((total, entry) => total + entry.amount, 0);

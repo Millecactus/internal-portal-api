@@ -1,6 +1,7 @@
 import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions, EnduranceDocumentType } from 'endurance-core';
 import UserModel, { UserDocument } from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
+import Group from '../models/group.model.js';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
 import Badge from '../models/badge.model.js';
@@ -75,8 +76,31 @@ class LevellingRouter extends EnduranceRouter {
                 const completedQuestIds = Array.isArray(user.completedQuests)
                     ? user.completedQuests.map(quest => quest.quest._id)
                     : [];
-                const availableQuests = await Quest.find({ _id: { $nin: completedQuestIds }, status: 'open' }).exec();
 
+                // Récupérer les groupes auxquels l'utilisateur appartient
+                const userGroups = await Group.find({ users: user._id }).exec();
+                const userGroupIds = userGroups.map(group => group._id);
+
+                // Construire la requête pour les quêtes disponibles
+                const query = {
+                    _id: { $nin: completedQuestIds },
+                    status: 'open',
+                    $or: [
+                        // Quêtes sans assignation (ouvertes à tous)
+                        {
+                            $and: [
+                                { assignedUsers: { $exists: true, $size: 0 } },
+                                { assignedGroups: { $exists: true, $size: 0 } }
+                            ]
+                        },
+                        // Quêtes assignées directement à l'utilisateur
+                        { assignedUsers: user._id },
+                        // Quêtes assignées aux groupes de l'utilisateur
+                        { assignedGroups: { $in: userGroupIds } }
+                    ]
+                };
+
+                const availableQuests = await Quest.find(query).exec();
                 res.json(availableQuests);
             } catch (error) {
                 console.error('Erreur lors de la récupération des quêtes disponibles:', error);
