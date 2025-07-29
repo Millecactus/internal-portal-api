@@ -1,4 +1,4 @@
-import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
+import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from '@programisto/endurance-core';
 import LeaveModel from '../models/leaves.model.js';
 
 class LeavesRouter extends EnduranceRouter {

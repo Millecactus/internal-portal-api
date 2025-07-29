@@ -1,4 +1,4 @@
-import { EnduranceSchema, EnduranceModelType, ObjectId } from 'endurance-core';
+import { EnduranceSchema, EnduranceModelType, ObjectId } from '@programisto/endurance-core';
 import ContactModel from './contact.model.js';
 
 export enum ExperienceLevel {

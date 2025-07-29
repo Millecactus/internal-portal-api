@@ -4,7 +4,7 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import User from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
-import { enduranceEmitter, enduranceEventTypes, EnduranceModelType, EnduranceDocumentType } from 'endurance-core';
+import { enduranceEmitter, enduranceEventTypes, EnduranceModelType, EnduranceDocumentType } from '@programisto/endurance-core';
 import dotenv from 'dotenv';
 
 dotenv.config();

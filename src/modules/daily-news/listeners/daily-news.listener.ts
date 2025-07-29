@@ -1,4 +1,4 @@
-import { enduranceListener, enduranceEventTypes } from 'endurance-core';
+import { enduranceListener, enduranceEventTypes } from '@programisto/endurance-core';
 import fetch from 'node-fetch';
 
 // Définition des types pour les articles et les sources

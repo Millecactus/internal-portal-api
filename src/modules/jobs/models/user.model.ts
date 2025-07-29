@@ -1,4 +1,4 @@
-import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from 'endurance-core';
+import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from '@programisto/endurance-core';
 @EnduranceModelType.modelOptions({
     schemaOptions: {
         collection: 'users',

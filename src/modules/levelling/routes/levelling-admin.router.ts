@@ -1,4 +1,4 @@
-import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
+import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from '@programisto/endurance-core';
 import { ObjectId } from 'mongodb';
 import UserModel from '../models/user.model.js';
 import Quest from '../models/quest.model.js';

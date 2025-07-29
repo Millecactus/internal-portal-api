@@ -1,4 +1,4 @@
-import { enduranceCron, enduranceEmitter, enduranceEventTypes } from 'endurance-core';
+import { enduranceCron, enduranceEmitter, enduranceEventTypes } from '@programisto/endurance-core';
 
 const generateDailyWeather = async (): Promise<void> => {
   try {

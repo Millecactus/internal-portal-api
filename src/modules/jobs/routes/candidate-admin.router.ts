@@ -1,4 +1,4 @@
-import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
+import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from '@programisto/endurance-core';
 import CandidateModel, { ExperienceLevel } from '../models/candidate.model.js';
 import ContactModel from '../models/contact.model.js';
 import NoteModel from '../models/note.model.js';
@@ -65,17 +65,20 @@ class CandidateAdminRouter extends EnduranceRouter {
 
                 const [candidates, total] = await Promise.all([
                     CandidateModel.find(query)
-                        .populate({
-                            path: 'contact',
-                            select: 'firstname lastname email phone linkedin city',
-                            options: { strictPopulate: false }
-                        })
                         .sort(sortOptions)
                         .skip(skip)
                         .limit(limit)
                         .exec(),
                     CandidateModel.countDocuments(query)
                 ]);
+
+                // Récupérer tous les contacts associés aux candidats
+                const contactIds = candidates.map(candidate => candidate.contact).filter(Boolean);
+                const contacts = await ContactModel.find({ _id: { $in: contactIds } });
+                const contactsMap = contacts.reduce((acc, contact) => {
+                    acc[contact._id.toString()] = contact.toObject();
+                    return acc;
+                }, {} as Record<string, any>);
 
                 // Récupérer le nombre de candidatures par statut pour chaque candidat
                 const candidatesWithApplications = await Promise.all(candidates.map(async (candidate) => {
@@ -85,8 +88,21 @@ class CandidateAdminRouter extends EnduranceRouter {
                         return acc;
                     }, {} as Record<string, number>);
 
+                    const candidateObj = candidate.toObject();
+                    const contactId = candidate.contact?.toString();
+                    const contact = contactId ? contactsMap[contactId] : null;
+
                     return {
-                        ...candidate.toObject(),
+                        ...candidateObj,
+                        contact: contact ? {
+                            _id: contact._id,
+                            firstname: contact.firstname,
+                            lastname: contact.lastname,
+                            email: contact.email,
+                            phone: contact.phone,
+                            linkedin: contact.linkedin,
+                            city: contact.city
+                        } : null,
                         applicationsCount: {
                             total: applications.length,
                             ...applicationsByStatus

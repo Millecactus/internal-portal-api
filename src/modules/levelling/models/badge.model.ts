@@ -1,4 +1,4 @@
-import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from 'endurance-core';
+import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from '@programisto/endurance-core';
 import Quest from './quest.model.js';
 import User from './user.model.js';
 

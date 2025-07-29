@@ -1,4 +1,4 @@
-import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from 'endurance-core';
+import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions } from '@programisto/endurance-core';
 import JobModel, { JobStatus } from '../models/job.model.js';
 import CandidateModel from '../models/candidate.model.js';
 import ContactModel from '../models/contact.model.js';

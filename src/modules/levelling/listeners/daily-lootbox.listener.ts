@@ -1,4 +1,4 @@
-import { enduranceListener, enduranceEventTypes } from 'endurance-core';
+import { enduranceListener, enduranceEventTypes } from '@programisto/endurance-core';
 import Quest from '../models/quest.model.js';
 import DiscordService, { QuestInstance } from '../services/discord.service.js';
 import { registerCronJobs } from '../crons/daily-lootbox.cron.js';
@@ -97,6 +97,5 @@ enduranceListener.createListener(enduranceEventTypes.GENERATE_DAILY_LOOTBOX_V2, 
     generateDailyLootboxV2();
 });
 
-console.log("listener loaded");
 
 export default enduranceListener;

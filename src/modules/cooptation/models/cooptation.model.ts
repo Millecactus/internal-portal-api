@@ -1,4 +1,4 @@
-import { EnduranceSchema, EnduranceModelType, ObjectId, } from 'endurance-core';
+import { EnduranceSchema, EnduranceModelType, ObjectId, } from '@programisto/endurance-core';
 
 enum CooptationStatus {
     Sent = 'Sent',

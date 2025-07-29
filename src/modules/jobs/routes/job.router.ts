@@ -1,4 +1,4 @@
-import { EnduranceRouter, SecurityOptions, EnduranceAuthMiddleware, FileUploadConfig } from 'endurance-core';
+import { EnduranceRouter, SecurityOptions, FileUploadConfig } from '@programisto/endurance-core';
 import JobModel from '../models/job.model.js';
 import CandidateModel from '../models/candidate.model.js';
 import ContactModel from '../models/contact.model.js';

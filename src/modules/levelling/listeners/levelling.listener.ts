@@ -1,4 +1,4 @@
-import { enduranceListener, enduranceEventTypes } from 'endurance-core';
+import { enduranceListener, enduranceEventTypes } from '@programisto/endurance-core';
 import DiscordService from '../services/discord.service.js';
 
 interface QuestCompletedPayload {

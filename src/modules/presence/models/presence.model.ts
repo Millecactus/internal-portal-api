@@ -1,4 +1,4 @@
-import { EnduranceSchema, EnduranceModelType } from 'endurance-core';
+import { EnduranceSchema, EnduranceModelType } from '@programisto/endurance-core';
 import User from '../../levelling/models/user.model.js';
 
 @EnduranceModelType.pre<Presence>('save', async function (this: Presence, next) {

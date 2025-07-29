@@ -1,4 +1,4 @@
-import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
+import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from '@programisto/endurance-core';
 import User from './user.model.js';
 import Group from './group.model.js';
 import { Types } from 'mongoose';

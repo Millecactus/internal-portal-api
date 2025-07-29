@@ -1,5 +1,5 @@
 import Group from '../models/group.model.js';
-import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions } from 'endurance-core';
+import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions } from '@programisto/endurance-core';
 import User from '../models/user.model.js';
 
 class GroupAdminRouter extends EnduranceRouter {

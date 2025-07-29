@@ -1,4 +1,4 @@
-import { enduranceListener, enduranceEventTypes } from 'endurance-core';
+import { enduranceListener, enduranceEventTypes } from '@programisto/endurance-core';
 import fetch from 'node-fetch';
 import { User } from 'discord.js';
 

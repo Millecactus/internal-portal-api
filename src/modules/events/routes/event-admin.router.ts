@@ -1,5 +1,5 @@
 import Event from '../models/event.model.js';
-import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions } from 'endurance-core';
+import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions } from '@programisto/endurance-core';
 import User from '../models/user.model.js';
 
 class EventAdminRouter extends EnduranceRouter {

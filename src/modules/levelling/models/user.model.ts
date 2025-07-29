@@ -1,4 +1,4 @@
-import { enduranceEmitter, enduranceEventTypes, EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from 'endurance-core';
+import { enduranceEmitter, enduranceEventTypes, EnduranceSchema, EnduranceModelType, EnduranceDocumentType, ObjectId } from '@programisto/endurance-core';
 import Quest from './quest.model.js';
 import Badge from './badge.model.js';
 import { Types } from 'mongoose';
