@@ -35,6 +35,9 @@ class Event extends EnduranceSchema {
     @EnduranceModelType.prop({ type: [String], default: [] })
     public registeredUsers!: string[];
 
+    @EnduranceModelType.prop({ required: false })
+    public imageUrl?: string;
+
     public static getModel() {
         return EventModel;
     }
