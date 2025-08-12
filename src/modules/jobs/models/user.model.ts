@@ -10,7 +10,7 @@ import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from '@pro
         strict: false
     }
 })
-class UserAdmin extends EnduranceSchema {
+class UserJobsAdmin extends EnduranceSchema {
 
     @EnduranceModelType.prop({ required: true, unique: true })
     email!: string;
@@ -22,10 +22,10 @@ class UserAdmin extends EnduranceSchema {
     lastname!: string;
 
     public static getModel() {
-        return UserModel;
+        return UserJobsModel;
     }
 }
 
-const UserModel = EnduranceModelType.getModelForClass(UserAdmin);
-export default UserModel;
-export type UserDocument = EnduranceDocumentType<UserAdmin>;
+const UserJobsModel = EnduranceModelType.getModelForClass(UserJobsAdmin);
+export default UserJobsModel;
+export type UserJobsDocument = EnduranceDocumentType<UserJobsAdmin>;

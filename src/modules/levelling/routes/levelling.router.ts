@@ -1,5 +1,5 @@
 import { EnduranceRouter, enduranceEmitter, enduranceEventTypes, EnduranceAuthMiddleware, SecurityOptions, EnduranceDocumentType } from '@programisto/endurance-core';
-import UserModel, { UserDocument } from '../models/user.model.js';
+import UserModel, { UserLevellingDocument } from '../models/user.model.js';
 import Quest from '../models/quest.model.js';
 import Group from '../models/group.model.js';
 import fetch from 'node-fetch';
@@ -38,7 +38,7 @@ class LevellingRouter extends EnduranceRouter {
                         model: Badge,
                         options: { strictPopulate: false }
                     })
-                    .exec() as unknown as UserDocument;
+                    .exec() as unknown as UserLevellingDocument;
 
                 if (!fullUser) {
                     return res.status(404).send('Utilisateur non trouvé');
@@ -67,7 +67,7 @@ class LevellingRouter extends EnduranceRouter {
                         model: Quest,
                         options: { strictPopulate: false }
                     })
-                    .exec() as unknown as UserDocument;
+                    .exec() as unknown as UserLevellingDocument;
 
                 if (!user) {
                     return res.status(404).send('Utilisateur non trouvé');
@@ -116,7 +116,7 @@ class LevellingRouter extends EnduranceRouter {
                     return res.status(400).send('Missing discordId or questId parameter');
                 }
 
-                const user = await UserModel.findOne({ discordId }).exec() as unknown as UserDocument;
+                const user = await UserModel.findOne({ discordId }).exec() as unknown as UserLevellingDocument;
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -148,7 +148,7 @@ class LevellingRouter extends EnduranceRouter {
                 }
 
                 const excludeIdsArray = excludeDiscordIds ? excludeDiscordIds.split(',') : [];
-                const users = await UserModel.find({ discordId: { $nin: excludeIdsArray } }).exec() as unknown as UserDocument[];
+                const users = await UserModel.find({ discordId: { $nin: excludeIdsArray } }).exec() as unknown as UserLevellingDocument[];
 
                 for (const user of users) {
                     await user.completeQuest(quest._id);
@@ -163,7 +163,7 @@ class LevellingRouter extends EnduranceRouter {
 
         this.get('/update-nicknames', publicOptions, async (req: any, res: any) => {
             try {
-                const users = await UserModel.find().exec() as unknown as UserDocument[];
+                const users = await UserModel.find().exec() as unknown as UserLevellingDocument[];
                 for (const user of users) {
                     enduranceEmitter.emit(enduranceEventTypes.LEVELLING_UPDATE_NICKNAME, { user });
                 }
@@ -176,7 +176,7 @@ class LevellingRouter extends EnduranceRouter {
 
         this.get('/init-quest', publicOptions, async (req: any, res: any) => {
             try {
-                const users = await UserModel.find().exec() as unknown as UserDocument[];
+                const users = await UserModel.find().exec() as unknown as UserLevellingDocument[];
                 const quest = await Quest.findOne({ name: 'Welcome' }).exec();
                 if (!quest) {
                     throw new Error('Quest "Welcome" not found.');

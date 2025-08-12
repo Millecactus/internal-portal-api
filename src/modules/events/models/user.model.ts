@@ -9,10 +9,11 @@ import { enduranceEmitter, enduranceEventTypes, EnduranceSchema, EnduranceModelT
         toObject: { virtuals: true },
         toJSON: { virtuals: true },
         _id: true,
-        validateBeforeSave: false
+        validateBeforeSave: false,
+        strict: false
     }
 })
-class User extends EnduranceSchema {
+class UserEvent extends EnduranceSchema {
     @EnduranceModelType.prop({ required: true, unique: true })
     public email!: string;
 
@@ -23,10 +24,10 @@ class User extends EnduranceSchema {
     public lastname!: string;
 
     public static getModel() {
-        return UserModel;
+        return UserEventModel;
     }
 }
 
 
-const UserModel = EnduranceModelType.getModelForClass(User);
-export default UserModel;
+const UserEventModel = EnduranceModelType.getModelForClass(UserEvent);
+export default UserEventModel;

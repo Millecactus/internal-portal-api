@@ -1,5 +1,5 @@
 import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions } from '@programisto/endurance-core';
-import User from '../models/user.model.js';
+import UserAdmin from '../models/user-admin.model.js';
 import Role from '../models/role.model.js';
 import Group from '../../groups/models/group.model.js';
 import office365Service from '../services/office365.service.js';
@@ -43,11 +43,11 @@ class UserAdminRouter extends EnduranceRouter {
                 };
 
                 const [users, total] = await Promise.all([
-                    User.find(query)
+                    UserAdmin.find(query)
                         .sort(sortOptions)
                         .skip(skip)
                         .limit(limit),
-                    User.countDocuments(query)
+                    UserAdmin.countDocuments(query)
                 ]);
 
                 // Récupérer les rôles pour chaque utilisateur
@@ -82,7 +82,7 @@ class UserAdminRouter extends EnduranceRouter {
         this.post('/', securityOptions, async (req: any, res: any) => {
             try {
                 // Créer l'utilisateur dans la base de données
-                const user = new User(req.body);
+                const user = new UserAdmin(req.body);
                 const savedUser = await user.save();
                 // Créer le compte Microsoft 365
                 const m365User = await office365Service.createUser({
@@ -104,7 +104,7 @@ class UserAdminRouter extends EnduranceRouter {
         // Modifier un utilisateur existant
         this.put('/:id', securityOptions, async (req: any, res: any) => {
             try {
-                const user = await User.findByIdAndUpdate(
+                const user = await UserAdmin.findByIdAndUpdate(
                     req.params.id,
                     req.body,
                     { new: true }
@@ -131,7 +131,7 @@ class UserAdminRouter extends EnduranceRouter {
         // Supprimer un utilisateur
         this.delete('/:id', securityOptions, async (req: any, res: any) => {
             try {
-                const user = await User.findByIdAndDelete(req.params.id);
+                const user = await UserAdmin.findByIdAndDelete(req.params.id);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -145,7 +145,7 @@ class UserAdminRouter extends EnduranceRouter {
         // Activer/Désactiver un utilisateur
         this.patch('/:id/toggle-active', securityOptions, async (req: any, res: any) => {
             try {
-                const user = await User.findById(req.params.id);
+                const user = await UserAdmin.findById(req.params.id);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -176,7 +176,7 @@ class UserAdminRouter extends EnduranceRouter {
                     return res.status(400).json({ error: 'Role IDs array is required and must not be empty' });
                 }
 
-                const user = await User.findById(req.params.id);
+                const user = await UserAdmin.findById(req.params.id);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -217,7 +217,7 @@ class UserAdminRouter extends EnduranceRouter {
                     return res.status(400).json({ error: 'Role IDs array is required and must not be empty' });
                 }
 
-                const user = await User.findById(req.params.id);
+                const user = await UserAdmin.findById(req.params.id);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -255,7 +255,7 @@ class UserAdminRouter extends EnduranceRouter {
                 const userId = req.params.id;
 
                 // Vérifier si l'utilisateur existe
-                const user = await User.findById(userId);
+                const user = await UserAdmin.findById(userId);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -281,7 +281,7 @@ class UserAdminRouter extends EnduranceRouter {
                 }
 
                 // Vérifier si l'utilisateur existe
-                const user = await User.findById(userId);
+                const user = await UserAdmin.findById(userId);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }
@@ -323,7 +323,7 @@ class UserAdminRouter extends EnduranceRouter {
                 }
 
                 // Vérifier si l'utilisateur existe
-                const user = await User.findById(userId);
+                const user = await UserAdmin.findById(userId);
                 if (!user) {
                     return res.status(404).send('User not found');
                 }

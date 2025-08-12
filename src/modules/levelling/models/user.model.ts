@@ -64,10 +64,11 @@ class UserBadge extends EnduranceSchema {
         toObject: { virtuals: true },
         toJSON: { virtuals: true },
         _id: true,
-        validateBeforeSave: false
+        validateBeforeSave: false,
+        strict: false
     }
 })
-class User extends EnduranceSchema {
+class UserLevelling extends EnduranceSchema {
     @EnduranceModelType.prop({ required: true, unique: true })
     public email!: string;
 
@@ -96,7 +97,7 @@ class User extends EnduranceSchema {
         return this.xpHistory.reduce((total, entry) => total + entry.amount, 0);
     }
 
-    public getLevel(this: EnduranceDocumentType<User>): number {
+    public getLevel(this: EnduranceDocumentType<UserLevelling>): number {
         let totalXP = this.getXP();
         let level = 1;
         const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
@@ -111,14 +112,14 @@ class User extends EnduranceSchema {
         return level;
     }
 
-    public getXPforNextLevel(this: EnduranceDocumentType<User>): number {
+    public getXPforNextLevel(this: EnduranceDocumentType<UserLevelling>): number {
         const level = this.getLevel();
         const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
         const coefficient = process.env.LEVELLING_COEFFICIENT ? parseFloat(process.env.LEVELLING_COEFFICIENT) : 1.3;
         return Math.floor(baseXP * Math.pow(coefficient, level - 1));
     }
 
-    public async addXP(this: EnduranceDocumentType<User>, amount: number, note: string, questId?: ObjectId): Promise<void> {
+    public async addXP(this: EnduranceDocumentType<UserLevelling>, amount: number, note: string, questId?: ObjectId): Promise<void> {
         console.log("ADD XP");
         if (typeof amount !== 'number' || amount <= 0) {
             throw new Error('The amount must be a positive number.');
@@ -148,7 +149,7 @@ class User extends EnduranceSchema {
         }
     }
 
-    public async completeQuest(this: EnduranceDocumentType<User>, questId: ObjectId): Promise<void> {
+    public async completeQuest(this: EnduranceDocumentType<UserLevelling>, questId: ObjectId): Promise<void> {
         console.log("COMPLETE QUEST");
         try {
             console.log("BEFORE QUEST");
@@ -214,7 +215,7 @@ class User extends EnduranceSchema {
     }
 }
 
-const UserModel = EnduranceModelType.getModelForClass(User, {
+const UserLevellingModel = EnduranceModelType.getModelForClass(UserLevelling, {
     schemaOptions: {
         collection: 'users',
         timestamps: true,
@@ -224,7 +225,7 @@ const UserModel = EnduranceModelType.getModelForClass(User, {
 });
 
 // Ajout des méthodes en tant que méthodes d'instance du modèle Mongoose
-UserModel.prototype.getXP = function (this: EnduranceDocumentType<User>): number {
+UserLevellingModel.prototype.getXP = function (this: EnduranceDocumentType<UserLevelling>): number {
     // Utiliser la méthode get() de Mongoose pour accéder à xpHistory
     const xpHistory = (this as any).get('xpHistory');
 
@@ -238,7 +239,7 @@ UserModel.prototype.getXP = function (this: EnduranceDocumentType<User>): number
     }, 0);
 };
 
-UserModel.prototype.getLevel = function (this: EnduranceDocumentType<User>): number {
+UserLevellingModel.prototype.getLevel = function (this: EnduranceDocumentType<UserLevelling>): number {
     let totalXP = this.getXP();
     let level = 1;
     const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
@@ -253,14 +254,14 @@ UserModel.prototype.getLevel = function (this: EnduranceDocumentType<User>): num
     return level;
 };
 
-UserModel.prototype.getXPforNextLevel = function (): number {
+UserLevellingModel.prototype.getXPforNextLevel = function (): number {
     const level = this.getLevel();
     const baseXP = process.env.LEVELLING_BASE_XP ? parseInt(process.env.LEVELLING_BASE_XP) : 500;
     const coefficient = process.env.LEVELLING_COEFFICIENT ? parseFloat(process.env.LEVELLING_COEFFICIENT) : 1.3;
     return Math.floor(baseXP * Math.pow(coefficient, level - 1));
 };
 
-UserModel.prototype.addXP = async function (amount: number, note: string, questId?: ObjectId): Promise<void> {
+UserLevellingModel.prototype.addXP = async function (amount: number, note: string, questId?: ObjectId): Promise<void> {
     if (typeof amount !== 'number' || amount <= 0) {
         throw new Error('The amount must be a positive number.');
     }
@@ -289,7 +290,7 @@ UserModel.prototype.addXP = async function (amount: number, note: string, questI
     }
 };
 
-UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<User>, questId: ObjectId): Promise<void> {
+UserLevellingModel.prototype.completeQuest = async function (this: EnduranceDocumentType<UserLevelling>, questId: ObjectId): Promise<void> {
     try {
         const quest = await Quest.findById(questId).populate('badgeReward').exec();
         if (!quest) {
@@ -348,5 +349,5 @@ UserModel.prototype.completeQuest = async function (this: EnduranceDocumentType<
     }
 };
 
-export default UserModel;
-export type UserDocument = EnduranceDocumentType<User>;
+export default UserLevellingModel;
+export type UserLevellingDocument = EnduranceDocumentType<UserLevelling>;

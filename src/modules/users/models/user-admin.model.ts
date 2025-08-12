@@ -36,10 +36,10 @@ class UserAdmin extends EnduranceSchema {
     isActive!: boolean;
 
     public static getModel() {
-        return UserModel;
+        return UserAdminModel;
     }
 }
 
-const UserModel = EnduranceModelType.getModelForClass(UserAdmin);
-export default UserModel;
-export type UserDocument = EnduranceDocumentType<UserAdmin>;
+const UserAdminModel = EnduranceModelType.getModelForClass(UserAdmin);
+export default UserAdminModel;
+export type UserAdminDocument = EnduranceDocumentType<UserAdmin>;

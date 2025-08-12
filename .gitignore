@@ -5,3 +5,4 @@ logs
 logs/access.log
 uploads/
 uploads/applications/
+logs/
