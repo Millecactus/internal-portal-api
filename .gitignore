@@ -3,7 +3,10 @@ node_modules
 dist
 logs
 logs/access.log
-uploads/
-uploads/applications/
+uploads/*
+!uploads/.gitkeep
+!uploads/applications/
+uploads/applications/*
+!uploads/applications/.gitkeep
 logs/
 sync_programisto_to_develop.sh
