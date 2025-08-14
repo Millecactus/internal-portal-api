@@ -355,12 +355,12 @@ class LevellingAdminRouter extends EnduranceRouter {
                             continue;
                         }
                         console.log(user.firstname, "completed quest");
-                        await user.completeQuest(questObjectId);
+                        await (user as any).completeQuest(questObjectId);
 
                         results.success.push({
                             userId,
-                            xp: user.getXP(),
-                            level: user.getLevel(),
+                            xp: (user as any).getXP(),
+                            level: (user as any).getLevel(),
                             completedQuests: user.completedQuests.length
                         });
                     } catch (error) {

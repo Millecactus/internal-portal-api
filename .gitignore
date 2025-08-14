@@ -6,3 +6,4 @@ logs/access.log
 uploads/
 uploads/applications/
 logs/
+sync_programisto_to_develop.sh

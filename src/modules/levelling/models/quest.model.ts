@@ -49,7 +49,7 @@ class Quest extends EnduranceSchema {
     @EnduranceModelType.prop({ type: [Types.ObjectId], ref: 'Group', default: [], required: false })
     public assignedGroups?: Types.ObjectId[];
 
-    static async getTodayQuestWithLootboxHour(): Promise<Quest | null> {
+    static async getTodayQuestWithLootboxHour(): Promise<any> {
         try {
             const today = new Date();
             today.setHours(0, 0, 0, 0);

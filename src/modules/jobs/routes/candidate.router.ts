@@ -30,15 +30,21 @@ class CandidateAdminRouter extends EnduranceRouter {
                     return res.status(404).json({ message: 'Contact non trouvé' });
                 }
 
-                const candidate = await CandidateModel.findOne({ contact: contact._id })
-                    .populate({
-                        path: 'contact',
-                        select: 'firstname lastname email phone linkedin city notes',
-                        options: { strictPopulate: false }
-                    });
+                const candidate = await CandidateModel.findOne({ contact: contact._id });
 
                 if (!candidate) {
                     return res.status(404).json({ message: 'Candidat non trouvé' });
+                }
+
+                // Récupérer les informations du contact
+                let contactInfo: { firstname: string; lastname: string; email: string } | null = null;
+                if (candidate && candidate.contact) {
+                    const contact = await ContactModel.findById(candidate.contact);
+                    contactInfo = contact ? {
+                        firstname: contact.firstname,
+                        lastname: contact.lastname,
+                        email: contact.email
+                    } : null;
                 }
 
                 // Récupérer les candidatures avec les offres d'emploi
@@ -51,6 +57,7 @@ class CandidateAdminRouter extends EnduranceRouter {
 
                 return res.json({
                     ...candidate.toObject(),
+                    contact: contactInfo,
                     applications
                 });
             } catch (error) {
@@ -130,11 +137,23 @@ class CandidateAdminRouter extends EnduranceRouter {
                     return res.status(401).json({ message: 'Token expiré' });
                 }
 
-                // Trouver le candidat avec ce token
+                // Trouver le candidat avec ce token (première requête, sans populate)
                 const candidate = await CandidateModel.findOne({
                     magicLinkToken: token,
                     magicLinkExpiresAt: { $gt: new Date() }
-                }).populate('contact');
+                });
+
+                // Si le candidat existe, récupérer le contact dans une deuxième requête
+                let contactInfo: { firstname: string; lastname: string; email: string } | null = null;
+                if (candidate && candidate.contact) {
+                    const contact = await CandidateModel.db.model('Contact').findById(candidate.contact);
+                    // Extraire seulement les champs nécessaires du contact
+                    contactInfo = contact ? {
+                        firstname: contact.firstname,
+                        lastname: contact.lastname,
+                        email: contact.email
+                    } : null;
+                }
 
                 if (!candidate) {
                     return res.status(401).json({ message: 'Token invalide ou déjà utilisé' });
@@ -168,7 +187,7 @@ class CandidateAdminRouter extends EnduranceRouter {
                     candidate: {
                         id: candidate._id,
                         email: decoded.email,
-                        contact: candidate.contact
+                        contact: contactInfo
                     }
                 });
             } catch (error) {

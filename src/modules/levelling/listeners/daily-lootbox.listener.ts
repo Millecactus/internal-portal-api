@@ -61,13 +61,15 @@ async function generateDailyLootboxV2(): Promise<void> {
             });
             await newQuest.save();
             console.log('New daily lootbox quest created:', newQuest);
-            lootboxQuest = newQuest;
+            lootboxQuest = newQuest as any;
 
-            const randomMinute = Math.floor(Math.random() * 60);
-            const date = new Date(lootboxQuest.startDate || new Date());
-            const cronFormat = `${randomMinute} ${lootboxQuest.lootboxHour} ${date.getDate()} ${date.getMonth() + 1} *`;
+            if (lootboxQuest) {
+                const randomMinute = Math.floor(Math.random() * 60);
+                const date = new Date(lootboxQuest.startDate || new Date());
+                const cronFormat = `${randomMinute} ${lootboxQuest.lootboxHour} ${date.getDate()} ${date.getMonth() + 1} *`;
 
-            registerCronJobs(cronFormat);
+                registerCronJobs(cronFormat);
+            }
         }
     } catch (error) {
         console.error('Error processing daily lootbox quest:', error);
@@ -76,7 +78,7 @@ async function generateDailyLootboxV2(): Promise<void> {
 
 const startDailyLootbox = async (): Promise<void> => {
     try {
-        const lootboxQuest = await Quest.getTodayQuestWithLootboxHour() as unknown as QuestInstance;
+        const lootboxQuest = await Quest.getTodayQuestWithLootboxHour() as any;
         if (lootboxQuest) {
             if (lootboxQuest.status === 'draft') {
                 lootboxQuest.status = 'open';

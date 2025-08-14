@@ -178,8 +178,8 @@ const DiscordService = () => {
                     }
 
                     if (subcommand === 'xp') {
-                        const xp = user.getXP();
-                        const currentLevel = user.getLevel();
+                        const xp = (user as any).getXP();
+                        const currentLevel = (user as any).getLevel();
                         const baseXP = process.env.LEVELLING_XP_BASE ? parseInt(process.env.LEVELLING_XP_BASE) : 500;
                         const coefficient = process.env.LEVELLING_COEFFICIENT ? parseFloat(process.env.LEVELLING_COEFFICIENT) : 1.3;
                         const xpForNextLevel = Math.floor(baseXP * Math.pow(coefficient, currentLevel - 1));

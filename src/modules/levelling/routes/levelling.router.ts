@@ -49,8 +49,8 @@ class LevellingRouter extends EnduranceRouter {
                     xpHistory: fullUser.get('xpHistory'),
                     completedQuests: fullUser.get('completedQuests'),
                     badges: fullUser.get('badges'),
-                    level: fullUser.getLevel(),
-                    xpForNextLevel: fullUser.getXPforNextLevel()
+                    level: (fullUser as any).getLevel(),
+                    xpForNextLevel: (fullUser as any).getXPforNextLevel()
                 });
             } catch (error) {
                 console.error('Error fetching user:', error);
@@ -126,7 +126,7 @@ class LevellingRouter extends EnduranceRouter {
                     return res.status(404).send('Quest not found');
                 }
 
-                await user.completeQuest(quest._id);
+                await (user as any).completeQuest(quest._id);
                 res.send(`Quest ${quest.name} completed for user with discordId ${discordId}`);
             } catch (error) {
                 console.error('Error completing quest:', error);
@@ -151,7 +151,7 @@ class LevellingRouter extends EnduranceRouter {
                 const users = await UserModel.find({ discordId: { $nin: excludeIdsArray } }).exec() as unknown as UserLevellingDocument[];
 
                 for (const user of users) {
-                    await user.completeQuest(quest._id);
+                    await (user as any).completeQuest(quest._id);
                 }
 
                 res.send(`Quest ${quest.name} completed for all users except those with discordIds: ${excludeIdsArray.join(', ')}`);
@@ -183,7 +183,7 @@ class LevellingRouter extends EnduranceRouter {
                 }
 
                 for (const user of users) {
-                    await user.completeQuest(quest._id);
+                    await (user as any).completeQuest(quest._id);
                 }
 
                 res.send('Quest initialized for all users');
