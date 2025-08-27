@@ -10,3 +10,5 @@ uploads/applications/*
 !uploads/applications/.gitkeep
 logs/
 sync_programisto_to_develop.sh
+logs/*
+logs/
