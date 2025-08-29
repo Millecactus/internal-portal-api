@@ -124,20 +124,22 @@ class JobAdminRouter extends EnduranceRouter {
                         options: { strictPopulate: false }
                     });
 
-                // Pour chaque candidat, récupérer son contact
+                // Filtrer les applications qui ont un candidat et récupérer leurs contacts
                 const applicationsWithContacts = await Promise.all(
-                    applications.map(async (application) => {
-                        const candidate = application.candidateId as any;
-                        const contact = await ContactModel.findById(candidate.contact);
+                    applications
+                        .filter(application => application.candidateId) // Filtrer les applications sans candidat
+                        .map(async (application) => {
+                            const candidate = application.candidateId as any;
+                            const contact = candidate.contact ? await ContactModel.findById(candidate.contact) : null;
 
-                        return {
-                            ...application.toObject(),
-                            candidate: {
-                                ...candidate.toObject(),
-                                contact: contact ? contact.toObject() : null
-                            }
-                        };
-                    })
+                            return {
+                                ...application.toObject(),
+                                candidate: {
+                                    ...candidate.toObject(),
+                                    contact: contact ? contact.toObject() : null
+                                }
+                            };
+                        })
                 );
 
                 return res.json({
