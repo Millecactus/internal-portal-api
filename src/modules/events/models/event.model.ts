@@ -38,6 +38,9 @@ class Event extends EnduranceSchema {
     @EnduranceModelType.prop({ required: false })
     public imageUrl?: string;
 
+    @EnduranceModelType.prop({ required: false })
+    public imageFileId?: string;
+
     public static getModel() {
         return EventModel;
     }

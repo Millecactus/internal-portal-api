@@ -8,10 +8,19 @@
     "start": "node ./dist/bin/www",
     "dev": "tsc-watch --onSuccess \"node ./dist/bin/www \"",
     "test": "mocha",
-    "build": "tsc"
+    "build": "tsc",
+    "edrm-storage:test": "npm run build && node -e \"console.log('✅ Module EDRM Storage compilé avec succès'); console.log('📋 Pour tester le module:'); console.log('   1. Configurez vos variables d\\'environnement AWS'); console.log('   2. Intégrez le module dans votre application'); console.log('   3. Testez les endpoints REST'); console.log('📚 Consultez la documentation: src/modules/edrm-storage/README.md');\"",
+    "edrm-storage:migrate": "ts-node -e \"import('./src/modules/edrm-storage/migrations/edrm-storage.migration.js').then(m => m.runEdrmStorageMigrations())\"",
+    "edrm-storage:build": "tsc src/modules/edrm-storage/**/*.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.540.0",
+    "@aws-sdk/s3-request-presigner": "^3.879.0",
     "@azure/msal-node": "^3.5.1",
+    "@programisto/edrm-exams": "^0.3.6",
+    "@programisto/edrm-mailer": "^1.0.3",
+    "@programisto/edrm-storage": "^1.0.2",
+    "@programisto/edrm-user": "^0.4.17",
     "@programisto/endurance-core": "1.1.11",
     "@typegoose/typegoose": "^12.17.0",
     "@types/multer": "^1.4.12",
@@ -24,10 +33,7 @@
     "mongoose": "^8.16.4",
     "multer": "^1.4.5-lts.2",
     "openai": "^4.61.1",
-    "tsc-watch": "^6.2.1",
-    "@programisto/edrm-mailer": "^1.0.3",
-    "@programisto/edrm-exams": "^0.3.6",
-    "@programisto/edrm-user": "^0.4.17"
+    "tsc-watch": "^6.2.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
