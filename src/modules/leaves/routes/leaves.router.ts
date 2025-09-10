@@ -25,6 +25,17 @@ class LeavesRouter extends EnduranceRouter {
             }
         });
 
+        // Récupérer les options de congés disponibles selon le contrat
+        this.get('/options', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const availableTypes = await (LeaveModel as any).getAvailableLeaveTypes(req.user._id);
+                res.json({ availableTypes });
+            } catch (error) {
+                console.error('Erreur lors de la récupération des options de congés:', error);
+                res.status(500).json({ error: 'Erreur interne du serveur' });
+            }
+        });
+
         // Créer un congé
         this.post('/', authenticatedOptions, async (req: any, res: any) => {
             try {

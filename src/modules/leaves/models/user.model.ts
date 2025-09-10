@@ -1,6 +1,6 @@
 import { EnduranceSchema, EnduranceModelType, EnduranceDocumentType } from '@programisto/endurance-core';
-import { Types } from 'mongoose';
 
+// Modèle User simplifié pour le module leaves (sans dépendances)
 @EnduranceModelType.modelOptions({
     schemaOptions: {
         collection: 'users',
@@ -12,24 +12,25 @@ import { Types } from 'mongoose';
         strict: false
     }
 })
-class WorkContractUser extends EnduranceSchema {
+class LeavesUser extends EnduranceSchema {
+    @EnduranceModelType.prop({ required: true, unique: true })
+    public email!: string;
+
     @EnduranceModelType.prop({ required: true })
     public firstname!: string;
 
     @EnduranceModelType.prop({ required: true })
     public lastname!: string;
 
-    @EnduranceModelType.prop({ type: [Types.ObjectId], ref: 'WorkContract', default: [] })
-    public workContracts!: Types.ObjectId[];
-
     @EnduranceModelType.prop({ required: false, default: true })
     public isActive!: boolean;
 
     public static getModel() {
-        return WorkContractUserModel;
+        return LeavesUserModel;
     }
 }
 
-const WorkContractUserModel = EnduranceModelType.getModelForClass(WorkContractUser);
-export default WorkContractUserModel;
-export type UserDocument = EnduranceDocumentType<WorkContractUser>;
+const LeavesUserModel = EnduranceModelType.getModelForClass(LeavesUser);
+
+export default LeavesUserModel;
+export type UserDocument = EnduranceDocumentType<LeavesUser>;

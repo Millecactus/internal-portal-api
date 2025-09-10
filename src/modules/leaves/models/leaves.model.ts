@@ -1,11 +1,13 @@
 import { EnduranceSchema, EnduranceModelType, ObjectId } from '@programisto/endurance-core';
+import WorkContractModel, { ContractType, WorkTimeType } from './work-contract.model.js';
 
 enum LeaveType {
     PAID = 'PAID',           // Congés payés
     RTT = 'RTT',             // RTT
     EXCEPTIONAL = 'EXCEPTIONAL', // Congés exceptionnels
     UNPAID = 'UNPAID',       // Congés sans solde
-    SICK = 'SICK'            // Maladie
+    SICK = 'SICK',           // Maladie
+    NONE = 'NONE'            // Aucun congé disponible
 }
 
 enum LeaveStatus {
@@ -14,6 +16,7 @@ enum LeaveStatus {
     REJECTED = 'REJECTED',   // Rejeté
     CANCELLED = 'CANCELLED'  // Annulé
 }
+
 
 @EnduranceModelType.modelOptions({
     options: {
@@ -53,5 +56,52 @@ class Leave extends EnduranceSchema {
     }
 }
 
+
 const LeaveModel = EnduranceModelType.getModelForClass(Leave);
+
+
+// Ajouter la méthode statique au modèle
+(LeaveModel as any).getAvailableLeaveTypes = async function (userId: ObjectId): Promise<LeaveType[]> {
+    try {
+        // Récupérer le contrat actif de l'utilisateur
+        const activeContract = await WorkContractModel.findOne({
+            user: userId,
+            isActive: true
+        }).exec();
+
+        if (!activeContract) {
+            // Si pas de contrat actif, retourner NONE
+            return [LeaveType.NONE];
+        }
+
+        const { contractType, weeklyHours, hasRTT } = activeContract;
+
+        // Logique selon le type de contrat
+        switch (contractType) {
+            case ContractType.INTERNSHIP:
+                return [LeaveType.UNPAID, LeaveType.SICK];
+
+            case ContractType.FREELANCE:
+                return [LeaveType.UNPAID];
+
+            case ContractType.CDI:
+            case ContractType.CDD:
+            case ContractType.APPRENTICESHIP:
+            case ContractType.PROFESSIONAL:
+                // Si CDI 37.5h avec RTT
+                if (weeklyHours === WorkTimeType.HOURS_37_5 && hasRTT) {
+                    return [LeaveType.PAID, LeaveType.RTT, LeaveType.EXCEPTIONAL, LeaveType.UNPAID, LeaveType.SICK];
+                }
+                // Sinon (CDI 35h, CDD, apprentissage, contrat pro)
+                return [LeaveType.PAID, LeaveType.EXCEPTIONAL, LeaveType.UNPAID, LeaveType.SICK];
+
+            default:
+                return [LeaveType.NONE];
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des options de congés:', error);
+        return [LeaveType.NONE]; // Fallback
+    }
+};
+
 export default LeaveModel;
