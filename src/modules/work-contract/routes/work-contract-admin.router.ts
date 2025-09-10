@@ -345,6 +345,93 @@ class WorkContractAdminRouter extends EnduranceRouter {
             }
         });
 
+        // Modifier un contrat existant
+        this.put('/contracts/:id', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const contractId = req.params.id;
+                const updateData = req.body;
+
+                // Vérifier que le contrat existe
+                const existingContract = await WorkContractModel.findById(contractId);
+                if (!existingContract) {
+                    return res.status(404).json({ message: 'Contrat non trouvé' });
+                }
+
+                // Si on change l'utilisateur, vérifier qu'il n'y a pas de conflit de contrat actif
+                if (updateData.user && updateData.user !== existingContract.user.toString()) {
+                    const existingActiveContract = await WorkContractModel.findOne({
+                        user: updateData.user,
+                        isActive: true,
+                        _id: { $ne: contractId }
+                    });
+
+                    if (existingActiveContract && updateData.isActive !== false) {
+                        return res.status(400).json({
+                            message: 'Cet utilisateur a déjà un contrat actif. Veuillez d\'abord clôturer le contrat existant.'
+                        });
+                    }
+                }
+
+                // Si on active ce contrat, désactiver les autres contrats de l'utilisateur
+                if (updateData.isActive === true) {
+                    const userId = updateData.user || existingContract.user;
+                    await WorkContractModel.updateMany(
+                        {
+                            user: userId,
+                            _id: { $ne: contractId },
+                            isActive: true
+                        },
+                        { isActive: false }
+                    );
+                }
+
+                // Mettre à jour le contrat
+                const updatedContract = await WorkContractModel.findByIdAndUpdate(
+                    contractId,
+                    updateData,
+                    { new: true, runValidators: true }
+                );
+
+                if (!updatedContract) {
+                    return res.status(404).json({ message: 'Contrat non trouvé après mise à jour' });
+                }
+
+                // Si l'utilisateur a changé, mettre à jour les références
+                if (updateData.user && updateData.user !== existingContract.user.toString()) {
+                    // Retirer le contrat de l'ancien utilisateur
+                    await UserModel.findByIdAndUpdate(
+                        existingContract.user,
+                        { $pull: { workContracts: contractId } }
+                    );
+
+                    // Ajouter le contrat au nouvel utilisateur
+                    await UserModel.findByIdAndUpdate(
+                        updateData.user,
+                        { $push: { workContracts: contractId } }
+                    );
+                }
+
+                enduranceEmitter.emit(enduranceEventTypes.CONTRACT_UPDATED, {
+                    userId: req.user._id,
+                    contractId: updatedContract._id,
+                    contractData: {
+                        contractType: updatedContract.contractType,
+                        startDate: updatedContract.startDate,
+                        user: updatedContract.user,
+                        isActive: updatedContract.isActive
+                    }
+                });
+
+                return res.json(updatedContract);
+            } catch (error) {
+                console.error('Erreur lors de la modification du contrat:', error);
+                if (error instanceof Error && error.message.includes('validation')) {
+                    return res.status(400).json({ message: error.message });
+                }
+                res.status(500).send('Erreur interne du serveur');
+            }
+        });
+
         // Clôturer un contrat (créer un avenant)
         this.post('/contracts/:id/close', authenticatedOptions, async (req: any, res: any) => {
             try {

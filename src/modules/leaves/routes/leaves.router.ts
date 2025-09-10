@@ -70,7 +70,7 @@ class LeavesRouter extends EnduranceRouter {
                 const leave = await LeaveModel.findOne({
                     _id: req.params.id,
                     userId: req.user._id
-                }).exec();
+                }).select('+documents').exec();
 
                 if (!leave) {
                     return res.status(404).json({ error: 'Congé non trouvé' });
@@ -113,7 +113,7 @@ class LeavesRouter extends EnduranceRouter {
                 const leave = await LeaveModel.findOneAndDelete({
                     _id: req.params.id,
                     userId: req.user._id
-                }).exec();
+                }).select('+documents').exec();
 
                 if (!leave) {
                     return res.status(404).json({ error: 'Congé non trouvé' });
@@ -145,7 +145,7 @@ class LeavesRouter extends EnduranceRouter {
                         approvedAt: new Date()
                     },
                     { new: true }
-                ).exec();
+                ).select('+documents').exec();
 
                 if (!leave) {
                     return res.status(404).json({ error: 'Congé non trouvé' });

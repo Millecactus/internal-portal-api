@@ -1,5 +1,6 @@
 import { EnduranceSchema, EnduranceModelType, ObjectId } from '@programisto/endurance-core';
 import WorkContractModel, { ContractType, WorkTimeType } from './work-contract.model.js';
+import { Types } from 'mongoose';
 
 enum LeaveType {
     PAID = 'PAID',           // Congés payés
@@ -50,6 +51,9 @@ class Leave extends EnduranceSchema {
 
     @EnduranceModelType.prop()
     public rejectionReason?: string;
+
+    @EnduranceModelType.prop({ type: [Types.ObjectId], ref: 'ContractDocument', default: [] })
+    public documents!: Types.ObjectId[];
 
     public static getModel() {
         return LeaveModel;
