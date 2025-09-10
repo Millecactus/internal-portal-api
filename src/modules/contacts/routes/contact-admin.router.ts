@@ -4,6 +4,7 @@ import NoteModel from '../../jobs/models/note.model.js';
 import CandidateModel from '../models/candidate.model.js';
 import JobApplicationModel from '../models/job-application.model.js';
 import JobModel from '../models/job.model.js';
+import OrganizationModel from '../models/organization.model.js';
 import { ObjectId } from 'mongodb';
 
 class ContactAdminRouter extends EnduranceRouter {
@@ -140,6 +141,10 @@ class ContactAdminRouter extends EnduranceRouter {
                     };
                 }
 
+                // Récupérer l'organisation du contact
+                const organization = await OrganizationModel.findOne({ contacts: id })
+                    .select('name email phone address city industry siret');
+
                 const contactWithData = {
                     ...contact.toObject(),
                     notes: notes.map(note => {
@@ -153,12 +158,39 @@ class ContactAdminRouter extends EnduranceRouter {
                             }
                         };
                     }),
-                    candidate: candidateData
+                    candidate: candidateData,
+                    organization: organization
                 };
 
                 return res.json(contactWithData);
             } catch (error) {
                 console.error('Erreur lors de la récupération du détail du contact:', error);
+                res.status(500).send('Erreur interne du serveur');
+            }
+        });
+
+        // Récupérer l'organisation d'un contact
+        this.get('/:id/organization', authenticatedOptions, async (req: any, res: any) => {
+            try {
+                const contactId = req.params.id;
+
+                // Vérifier que le contact existe
+                const contact = await ContactModel.findById(contactId);
+                if (!contact) {
+                    return res.status(404).json({ message: 'Contact non trouvé' });
+                }
+
+                // Récupérer l'organisation du contact
+                const organization = await OrganizationModel.findOne({ contacts: contactId })
+                    .select('name email phone address city industry siret siren vatNumber legalForm');
+
+                if (!organization) {
+                    return res.json({ organization: null });
+                }
+
+                return res.json({ organization });
+            } catch (error) {
+                console.error('Erreur lors de la récupération de l\'organisation du contact:', error);
                 res.status(500).send('Erreur interne du serveur');
             }
         });
