@@ -1,6 +1,6 @@
 import LeaveModel from '../models/leaves.model.js';
 import UserModel from '../models/user.model.js';
-import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions, EnduranceRequest } from '@programisto/endurance-core';
+import { EnduranceRouter, EnduranceAuthMiddleware, type SecurityOptions, EnduranceRequest, enduranceEmitter, enduranceEventTypes } from '@programisto/endurance-core';
 
 class LeavesAdminRouter extends EnduranceRouter {
     constructor() {
@@ -530,6 +530,83 @@ class LeavesAdminRouter extends EnduranceRouter {
                 ];
 
                 const updatedLeaves = await LeaveModel.aggregate(pipeline);
+                console.log("updated leaves", updatedLeaves);
+                // Émettre un événement pour chaque congé traité
+                for (const leave of updatedLeaves) {
+                    console.log('Émettant un événement pour la revue du congé...');
+                    await enduranceEmitter.emit(enduranceEventTypes.LEAVE_REVIEWED, {
+                        // Données principales pour l'événement
+                        eventName: 'LEAVE_REVIEWED',
+                        eventType: 'LEAVE_MANAGEMENT',
+                        timestamp: new Date().toISOString(),
+
+                        // Données de l'utilisateur concerné
+                        targetUserId: leave.userId,
+                        targetUser: {
+                            id: leave.userId,
+                            firstname: leave.userFirstname,
+                            lastname: leave.userLastname,
+                            email: leave.userEmail
+                        },
+
+                        // Données de l'action
+                        actionBy: {
+                            id: req.user._id,
+                            firstname: req.user.firstname,
+                            lastname: req.user.lastname,
+                            email: req.user.email
+                        },
+                        actionType: status === 'APPROVED' ? 'APPROVE' : 'REJECT',
+                        actionDate: new Date().toISOString(),
+
+                        // Données du congé
+                        entityId: leave._id,
+                        entityType: 'LEAVE',
+                        entityData: {
+                            id: leave._id,
+                            startDate: leave.startDate,
+                            endDate: leave.endDate,
+                            type: leave.type,
+                            status: status,
+                            comment: leave.comment,
+                            rejectionReason: status === 'REJECTED' ? rejectionReason : undefined
+                        },
+
+                        // Métadonnées pour les notifications
+                        notification: {
+                            title: status === 'APPROVED'
+                                ? 'Congé approuvé'
+                                : 'Congé refusé',
+                            message: status === 'APPROVED'
+                                ? `Votre demande de congé du ${new Date(leave.startDate).toLocaleDateString('fr-FR')} au ${new Date(leave.endDate).toLocaleDateString('fr-FR')} a été approuvée.`
+                                : `Votre demande de congé du ${new Date(leave.startDate).toLocaleDateString('fr-FR')} au ${new Date(leave.endDate).toLocaleDateString('fr-FR')} a été refusée.${rejectionReason ? ` Raison : ${rejectionReason}` : ''}`,
+                            type: status === 'APPROVED' ? 'SUCCESS' : 'WARNING',
+                            icon: status === 'APPROVED' ? '✅' : '❌',
+                            color: status === 'APPROVED' ? '#10B981' : '#F59E0B',
+                            priority: 2,
+                            actionUrl: `/leaves/${leave._id}`,
+                            scope: 'USER'
+                        },
+
+                        // Données brutes pour compatibilité
+                        rawData: {
+                            leaveId: leave._id,
+                            userId: leave.userId,
+                            status: status,
+                            approvedBy: req.user._id,
+                            approvedAt: new Date(),
+                            rejectionReason: status === 'REJECTED' ? rejectionReason : undefined,
+                            leaveData: {
+                                startDate: leave.startDate,
+                                endDate: leave.endDate,
+                                type: leave.type,
+                                userFirstname: leave.userFirstname,
+                                userLastname: leave.userLastname,
+                                userEmail: leave.userEmail
+                            }
+                        }
+                    });
+                }
 
                 return res.json({
                     message: `${updateResult.modifiedCount} congé(s) mis à jour avec succès`,

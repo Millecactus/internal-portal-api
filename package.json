@@ -19,6 +19,7 @@
     "@azure/msal-node": "^3.5.1",
     "@programisto/edrm-exams": "^0.3.6",
     "@programisto/edrm-mailer": "^1.0.3",
+    "@programisto/edrm-notifications": "^1.0.1",
     "@programisto/edrm-storage": "^1.0.2",
     "@programisto/edrm-user": "^0.4.17",
     "@programisto/endurance-core": "1.1.11",
