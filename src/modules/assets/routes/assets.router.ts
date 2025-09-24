@@ -34,7 +34,14 @@ class AssetsRouter extends EnduranceRouter {
 
                 // Filtres
                 if (status !== 'all') {
-                    query.status = status;
+                    // Gérer une liste de statuts séparés par des virgules (décoder l'URL si nécessaire)
+                    const decodedStatus = decodeURIComponent(status);
+                    const statusList = decodedStatus.split(',').map(s => s.trim()).filter(Boolean);
+                    if (statusList.length === 1) {
+                        query.status = statusList[0];
+                    } else if (statusList.length > 1) {
+                        query.status = { $in: statusList };
+                    }
                 }
 
                 if (assignedUser !== 'all') {

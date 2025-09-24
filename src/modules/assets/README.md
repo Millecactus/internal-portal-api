@@ -52,7 +52,10 @@ Ce module permet de gérer le matériel de l'entreprise et son affectation aux u
 
 ### Assets
 - `GET /` : Lister les assets (avec filtres, tri, pagination)
-  - **Filtres** : `status`, `category`, `assignedUser` (all/unassigned/me/ObjectId)
+  - **Filtres** : 
+    - `status` : statut unique ou liste séparée par virgules (ex: "ACTIVE,ORDERED" ou "ORDERED%2CACTIVE%2CINCIDENT")
+    - `category` : catégorie unique
+    - `assignedUser` : all/unassigned/me/ObjectId
   - **Recherche** : `search` (nom, description, numéro de série)
   - **Tri** : `sortBy`, `sortOrder`
   - **Pagination** : `page`, `limit`
@@ -135,6 +138,15 @@ GET /assets/users?search=john&isActive=true&sortBy=lastname&sortOrder=asc&page=1
 ```javascript
 GET /assets?assignedUser=me&status=ACTIVE&search=macbook
 // assignedUser peut être : 'all', 'unassigned', 'me', ou un ObjectId utilisateur
+
+GET /assets?status=ACTIVE,ORDERED&category=informatique
+// Filtre par plusieurs statuts : Actif ET Commandé
+
+GET /assets?status=ACTIVE,INCIDENT&assignedUser=me
+// Mes assets actifs ou en incident
+
+GET /assets?status=ORDERED%2CACTIVE%2CINCIDENT
+// Format encodé URL depuis le frontend (ORDERED,ACTIVE,INCIDENT)
 ```
 
 ### Exemple de détail d'un utilisateur
