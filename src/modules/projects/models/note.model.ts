@@ -23,3 +23,6 @@ class Note extends EnduranceSchema {
 const NoteModel = EnduranceModelType.getModelForClass(Note);
 export default NoteModel;
 
+
+
+
