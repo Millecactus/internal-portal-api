@@ -40,6 +40,8 @@ class AssetsRouter extends EnduranceRouter {
                 if (assignedUser !== 'all') {
                     if (assignedUser === 'unassigned') {
                         query.assignedUser = { $exists: false };
+                    } else if (assignedUser === 'me') {
+                        query.assignedUser = req.user._id;
                     } else {
                         query.assignedUser = new ObjectId(assignedUser);
                     }

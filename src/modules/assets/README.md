@@ -52,6 +52,10 @@ Ce module permet de gérer le matériel de l'entreprise et son affectation aux u
 
 ### Assets
 - `GET /` : Lister les assets (avec filtres, tri, pagination)
+  - **Filtres** : `status`, `category`, `assignedUser` (all/unassigned/me/ObjectId)
+  - **Recherche** : `search` (nom, description, numéro de série)
+  - **Tri** : `sortBy`, `sortOrder`
+  - **Pagination** : `page`, `limit`
 - `GET /:id` : Récupérer le détail d'un asset
 - `POST /` : Créer un nouvel asset
 - `PUT /:id` : Modifier un asset
@@ -124,6 +128,13 @@ POST /assets/:id/incident
 
 ```javascript
 GET /assets/users?search=john&isActive=true&sortBy=lastname&sortOrder=asc&page=1&limit=10
+```
+
+### Exemple de filtrage des assets
+
+```javascript
+GET /assets?assignedUser=me&status=ACTIVE&search=macbook
+// assignedUser peut être : 'all', 'unassigned', 'me', ou un ObjectId utilisateur
 ```
 
 ### Exemple de détail d'un utilisateur
