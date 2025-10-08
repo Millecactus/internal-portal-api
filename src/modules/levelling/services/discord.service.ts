@@ -72,8 +72,8 @@ const DiscordService = () => {
             const token = process.env.DISCORD_APP_TOKEN;
             if (!token) throw new Error('DISCORD_APP_TOKEN is not defined');
 
-            await client.login(token);
-            console.log("Bot logged in");
+            //await client.login(token);
+            //console.log("Bot logged in");
 
             if (!client || !client.guilds) {
                 throw new Error("Discord client or guilds are empty");
